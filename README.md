@@ -1,53 +1,69 @@
-# Project barista
+# E.D.N.A - Ecossistema D. Negociação Alcoólica
 
-One Paragraph of project description goes here
+Sistema de banco de dados de Bar. Gerencie produtos, atendimentos e outras atividades do seu bar com nosso sistema.
+
+> Esse projeto é parte do projeto final para a disciplina *Banco de Dados I*.
+
+## Funcionalidades
+- [ ]
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Antes de mais nada, inicie a base de dados com `make docker-run` (use `sudo` se necessário). Vá para a migração mais recente (se já não estiver) com `./migrate.sh up`.
+
+Por último rode projeto com `make run`, para rodar com _hot reloading_ (alterações serão atualizadas instantâneamente) use `make watch`.
+
+## Migrações
+
+> Migrações são scripts SQL que são rodados na base de dados e permitem criar um histórico de alterações e navegar por elas.
+
+Não esqueça de acionar a base de dados antes de rodar migrações.
+
+As migrações vivem em `migrations`. Utilize o script `migrate.sh` para gerenciar migrações. Crie novas migrações com `./migrate.sh create <migration_name>`. Vá para a migração mais recente com `./migrate.sh up`, volte uma migração com `./migrate.sh down 1`. Veja mais comandos em `./migrate.sh help`.
 
 ## MakeFile
 
-Run build make command with tests
+Compile e rode os testes.
 ```bash
 make all
 ```
 
-Build the application
+Compile a aplicação
 ```bash
 make build
 ```
 
-Run the application
+Rode a aplicação
 ```bash
 make run
 ```
-Create DB container
+
+Cria o banco de dados por um _container_ docker:
 ```bash
 make docker-run
 ```
 
-Shutdown DB Container
+Desativa o container:
 ```bash
 make docker-down
 ```
 
-DB Integrations Test:
+Testes de integração no Banco de Dados:
 ```bash
 make itest
 ```
 
-Live reload the application:
+Live reload aplicação:
 ```bash
 make watch
 ```
 
-Run the test suite:
+Rode os testes:
 ```bash
 make test
 ```
 
-Clean up binary from the last build:
+Remova o executavél
 ```bash
 make clean
 ```

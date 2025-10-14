@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"barista/internal/server"
+	"edna/internal/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {

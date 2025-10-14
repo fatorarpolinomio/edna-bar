@@ -1,4 +1,4 @@
-module barista
+module edna
 
 go 1.24.3
 
