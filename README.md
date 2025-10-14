@@ -8,7 +8,7 @@ Sistema de banco de dados de Bar. Gerencie produtos, atendimentos e outras ativi
 - [ ]
 
 ## Tecnologias
-- Golang
+- Golang 1.24
 - Postgres
 - Docker & Docker Compose
 - go-migrate
@@ -16,6 +16,12 @@ Sistema de banco de dados de Bar. Gerencie produtos, atendimentos e outras ativi
 ## Como rodar
 
 Configure as variáveis de ambiente em um arquivo `.env` seguindo os exemplos em `.env.example`.
+
+
+Primeiro, instale a versão `1.24` da linguagem Go, a versão mais recente do Docker e Docker-compose. Em adendo para realizar as migrações é preciso instalar o `go-migrate`, você pode fazer isso com:
+```sh
+go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.18.3
+```
 
 Inicie a base de dados com `make docker-run` (use `sudo` se necessário). Vá para a migração mais recente (se já não estiver) com `./migrate.sh up`.
 
