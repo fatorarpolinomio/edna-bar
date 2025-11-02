@@ -1,6 +1,7 @@
 package server
 
 import (
+	"edna/internal/services/fornecedor"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -9,10 +10,12 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	mux := http.NewServeMux()
 
+	fornecedorHandler := fornecedor.NewHandler(s.fornecedorStore)
 	// Register routes
 	mux.HandleFunc("/", s.HelloWorldHandler)
-
 	mux.HandleFunc("/health", s.healthHandler)
+
+	fornecedorHandler.RegisterRoutes(mux)
 
 	// Wrap the mux with CORS middleware
 	return s.corsMiddleware(mux)
