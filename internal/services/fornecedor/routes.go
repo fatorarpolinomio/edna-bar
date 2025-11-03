@@ -13,12 +13,13 @@ type Handler struct {
 	store FornecedorStore
 }
 
+
 type FornecedorStore interface {
-	GetAll(ctx context.Context) ([]model.Fornecedor, error)
+	GetAll(ctx context.Context, filters model.FornecedorFilters) ([]model.Fornecedor, error)
 	Create(ctx context.Context, props *model.Fornecedor) error
 	GetByID(ctx context.Context, id int64) (*model.Fornecedor, error)
 	Update(ctx context.Context, props *model.Fornecedor) error
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id int64) (*model.Fornecedor, error)
 }
 
 
@@ -34,12 +35,13 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /fornecedores/{id}", h.deleteFornecedorHandler)
 }
 
-
+// @summary Query all Fornecedores, allows filter, sorting and pagination
 func (h *Handler) getAllFornecedoresHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 
-	fornecedores, err := h.store.GetAll(ctx)
+	filters := model.NewFornecedorFilter(r.URL)
+	fornecedores, err := h.store.GetAll(ctx, filters)
 	if err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -140,11 +142,11 @@ func (h *Handler) deleteFornecedorHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = h.store.Delete(ctx, id)
+	model, err := h.store.Delete(ctx, id)
 	if err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
-	util.WriteJSON(w, http.StatusOK, nil)
+	util.WriteJSON(w, http.StatusOK, model)
 }

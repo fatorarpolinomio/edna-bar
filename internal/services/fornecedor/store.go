@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"edna/internal/model"
 	"edna/internal/types"
+	"strconv"
 )
 
 type Store struct {
@@ -15,10 +16,11 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db}
 }
 
-func (s *Store) GetAll(ctx context.Context) ([]model.Fornecedor, error) {
-	query := "SELECT id_fornecedor, nome, CNPJ FROM Fornecedor;"
 
-	rows, err := s.db.QueryContext(ctx, query)
+func (s *Store) GetAll(ctx context.Context, filters model.FornecedorFilters) ([]model.Fornecedor, error) {
+	query := "SELECT id_fornecedor, nome, CNPJ FROM Fornecedor"
+
+	rows, err := s.queryRowsWithFilter(ctx, query, filters)
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +36,32 @@ func (s *Store) GetAll(ctx context.Context) ([]model.Fornecedor, error) {
 	}
 
 	return fornecedores, nil
+}
+
+/// Busca com base em um conjunto de filtros
+func (s *Store) queryRowsWithFilter(
+	ctx context.Context,
+	query string,
+	filter model.FornecedorFilters,
+) (*sql.Rows, error){
+
+	var filterValues []any
+
+	if filter.Nome != "" {
+		filterValues = append(filterValues, filter.Nome)
+		query += " WHERE nome LIKE '%' || $1 || '%'"
+	}
+
+	if filter.Offset > 0 {
+		filterValues = append(filterValues, filter.Offset)
+		query += " OFFSET $" + strconv.Itoa(len(filterValues))
+	}
+	if filter.Limit > 0 {
+		filterValues = append(filterValues, filter.Limit)
+		query += " LIMIT $" + strconv.Itoa(len(filterValues))
+	}
+
+	return s.db.QueryContext(ctx, query, filterValues...)
 }
 
 func (s *Store) Create(ctx context.Context, props *model.Fornecedor) error {
@@ -74,19 +102,14 @@ func (s *Store) Update(ctx context.Context, props *model.Fornecedor) error {
 	return nil
 }
 
-func (s *Store) Delete(ctx context.Context, id int64) error {
-	query := "DELETE FROM Fornecedor WHERE id_fornecedor = $1;"
+func (s *Store) Delete(ctx context.Context, id int64) (*model.Fornecedor, error) {
+	query := "DELETE FROM Fornecedor WHERE id_fornecedor = $1 RETURNING *;"
 
-	res, err := s.db.ExecContext(ctx, query, id)
+	var model model.Fornecedor
+	row := s.db.QueryRowContext(ctx,query, id)
+	err := row.Scan(&model.Id, &model.Nome, &model.CNPJ)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return types.ErrNotFound
-	}
-	return nil
+	return &model, nil
 }
