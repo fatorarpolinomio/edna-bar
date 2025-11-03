@@ -5,7 +5,15 @@ Sistema de banco de dados de Bar. Gerencie produtos, atendimentos e outras ativi
 > Esse projeto é parte do projeto final para a disciplina *Banco de Dados I*.
 
 ## Funcionalidades
-- [ ]
+
+- Controle (leitura, criação, modificação, etc...):
+  - [x] Fornecedores
+  - [ ] Produtos
+  - [ ] Lotes
+  - [ ] Clientes
+  - [ ] Funcionários
+  - [ ] Vendas
+  - [ ] Ofertas
 
 ## Tecnologias
 - Golang 1.24
@@ -23,9 +31,9 @@ Primeiro, instale a versão `1.24` da linguagem Go, a versão mais recente do Do
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.18.3
 ```
 
-Inicie a base de dados com `make docker-run` (use `sudo` se necessário). Vá para a migração mais recente (se já não estiver) com `./migrate.sh up`.
+Inicie a base de dados com `make docker-run` (use `sudo` se necessário). Vá para a migração mais recente (se já não estiver) com `./migrate.sh up`, isso irá criar as tabelas no seu banco de dados (e populá-lo com dados), se quiser saber mais sobre o conceito de migrações veja a próxima seção.
 
-Por último rode projeto com `make run`, para rodar com _hot reloading_ (alterações serão atualizadas instantâneamente) use `make watch`.
+Por último rode projeto com `make run`. Para rodar com _hot reloading_ (alterações serão refletidas instantâneamente) use `make watch`.
 
 ## Migrações
 
@@ -33,7 +41,7 @@ Por último rode projeto com `make run`, para rodar com _hot reloading_ (altera�
 
 Não esqueça de acionar a base de dados antes de rodar migrações.
 
-As migrações vivem em `migrations`. Utilize o script `migrate.sh` para gerenciar migrações. Crie novas migrações com `./migrate.sh create <migration_name>`. Vá para a migração mais recente com `./migrate.sh up`, volte uma migração com `./migrate.sh down 1`. Veja mais comandos em `./migrate.sh help`.
+As migrações vivem em `migrations`. Utilize o script `migrate.sh` para gerenciar migrações. Crie novas migrações com `./migrate.sh create <migration_name>`. Vá para a migração mais recente com `./migrate.sh up`, volte **uma** migração com `./migrate.sh down 1`. Veja mais comandos em `./migrate.sh help`.
 
 
 ## Diagrama Conceitual
