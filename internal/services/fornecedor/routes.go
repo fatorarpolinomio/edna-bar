@@ -5,7 +5,6 @@ import (
 	"edna/internal/model"
 	"edna/internal/util"
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -102,13 +101,10 @@ func (h *Handler) fetchFornecedorHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	res, err := json.Marshal(*fornecedor)
-	if err != nil {
+	if err = util.WriteJSON(w, http.StatusOK, fornecedor); err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("Fornecedor fetched: %v", fornecedor)
-	util.WriteJSON(w, http.StatusOK, res)
 }
 
 
