@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	httpSwagger "github.com/swaggo/http-swagger"
+	_ "edna/docs"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
@@ -14,6 +17,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// Register routes
 	mux.HandleFunc("/", s.trailingSlashHandler)
 	mux.HandleFunc("/health", s.healthHandler)
+	mux.Handle("/swagger/", httpSwagger.Handler())
 
 	fornecedorHandler.RegisterRoutes(mux)
 
@@ -35,6 +39,8 @@ func (s *Server) trailingSlashHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Check health of the system
+// @summary Check health of the system
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := json.Marshal(s.db.Health())
 	if err != nil {
