@@ -6,5 +6,982 @@
         "contact": {},
         "version": "1.0"
     },
-    "paths": {}
+    "paths": {
+        "/": {
+            "get": {
+                "description": "Returns a 404 JSON response for unmatched routes.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Server"
+                ],
+                "summary": "Unmatched path handler",
+                "responses": {
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/fornecedores": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Fornecedor"
+                ],
+                "summary": "List Fornecedores",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by nome (partial match)",
+                        "name": "nome",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination offset (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination limit (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order: asc or desc",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Fornecedor"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Fornecedor"
+                ],
+                "summary": "Create Fornecedor",
+                "parameters": [
+                    {
+                        "description": "Fornecedor payload",
+                        "name": "fornecedor",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.FornecedorPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Fornecedor"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/fornecedores/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Fornecedor"
+                ],
+                "summary": "Get Fornecedor by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Fornecedor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Fornecedor"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Fornecedor"
+                ],
+                "summary": "Update Fornecedor",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Fornecedor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Fornecedor payload",
+                        "name": "fornecedor",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.FornecedorPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Fornecedor"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Fornecedor"
+                ],
+                "summary": "Delete Fornecedor",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Fornecedor ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Fornecedor"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Returns the health status of the application and dependencies.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Server"
+                ],
+                "summary": "Check health of the system",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/produtos/comercial": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "List Comercial products",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by nome (partial match)",
+                        "name": "nome",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by categoria",
+                        "name": "categoria",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by marca",
+                        "name": "marca",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination offset (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination limit (default 0)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order: asc or desc",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Minimum qnt_disponivel",
+                        "name": "min-qnt-dsp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum qnt_disponivel",
+                        "name": "max-qnt-dsp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Minimum qnt_total",
+                        "name": "min-qnt-total",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum qnt_total",
+                        "name": "max-qnt-total",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Minimum preco_venda",
+                        "name": "min-preco-venda",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Maximum preco_venda",
+                        "name": "max-preco-venda",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Comercial"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "Create Comercial Produto",
+                "parameters": [
+                    {
+                        "description": "Comercial product payload",
+                        "name": "produto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ProdutoComercialPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Comercial"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/produtos/comercial/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "Get Comercial Produto by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Produto ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Comercial"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "Update Comercial Produto",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Produto ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Comercial product payload",
+                        "name": "produto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ProdutoComercialPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Comercial"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/produtos/estrutural": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "List Estrutural products",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by nome (partial match)",
+                        "name": "nome",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by categoria",
+                        "name": "categoria",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by marca",
+                        "name": "marca",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination offset (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination limit (default 0)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order: asc or desc",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Minimum qnt_disponivel",
+                        "name": "min-qnt-dsp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum qnt_disponivel",
+                        "name": "max-qnt-dsp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Minimum qnt_total",
+                        "name": "min-qnt-total",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum qnt_total",
+                        "name": "max-qnt-total",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Estrutural"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "Create Estrutural Produto",
+                "parameters": [
+                    {
+                        "description": "Estrutural product payload",
+                        "name": "produto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ProdutoEstruturalPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Estrutural"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/produtos/estrutural/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "Get Estrutural Produto by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Produto ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Estrutural"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "Update Estrutural Produto",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Produto ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Estrutural product payload",
+                        "name": "produto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ProdutoEstruturalPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Estrutural"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/produtos/{id}": {
+            "delete": {
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "Delete Produto",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Produto ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.Comercial": {
+            "type": "object",
+            "properties": {
+                "categoria": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "marca": {
+                    "type": "string"
+                },
+                "nome": {
+                    "type": "string"
+                },
+                "preco_venda": {
+                    "type": "number"
+                },
+                "qnt_disponivel": {
+                    "type": "integer"
+                },
+                "qnt_total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.Estrutural": {
+            "type": "object",
+            "properties": {
+                "categoria": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "marca": {
+                    "type": "string"
+                },
+                "nome": {
+                    "type": "string"
+                },
+                "qnt_disponivel": {
+                    "type": "integer"
+                },
+                "qnt_total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.Fornecedor": {
+            "type": "object",
+            "properties": {
+                "cnpj": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "nome": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.FornecedorPayload": {
+            "type": "object",
+            "properties": {
+                "cnpj": {
+                    "type": "string"
+                },
+                "nome": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ProdutoComercialPayload": {
+            "type": "object",
+            "properties": {
+                "categoria": {
+                    "type": "string"
+                },
+                "marca": {
+                    "type": "string"
+                },
+                "nome": {
+                    "type": "string"
+                },
+                "preco_venda": {
+                    "type": "number"
+                },
+                "qnt_disponivel": {
+                    "type": "integer"
+                },
+                "qnt_total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.ProdutoEstruturalPayload": {
+            "type": "object",
+            "properties": {
+                "categoria": {
+                    "type": "string"
+                },
+                "marca": {
+                    "type": "string"
+                },
+                "nome": {
+                    "type": "string"
+                },
+                "qnt_disponivel": {
+                    "type": "integer"
+                },
+                "qnt_total": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
 }

@@ -29,7 +29,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 	return s.logMiddleware(s.corsMiddleware(mux))
 }
 
+// @Summary Unmatched path handler
+// @Description Returns a 404 JSON response for unmatched routes.
+// @Tags Server
+// @Produce json
+// @Success 404 {object} map[string]string
+// @Router / [get]
 func (s *Server) trailingSlashHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNotFound)
 	resp := map[string]string{"message": "Unmatched path, please check your url path and try again."}
 	jsonResp, err := json.Marshal(resp)
@@ -37,14 +44,18 @@ func (s *Server) trailingSlashHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to marshal response", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 	if _, err := w.Write(jsonResp); err != nil {
 		log.Printf("Failed to write response: %v", err)
 	}
 }
 
-// Check health of the system
-// @summary Check health of the system
+// @Summary Check health of the system
+// @Description Returns the health status of the application and dependencies.
+// @Tags Server
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]string
+// @Router /health [get]
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	resp, err := json.Marshal(s.db.Health())
 	if err != nil {

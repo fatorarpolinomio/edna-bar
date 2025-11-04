@@ -40,6 +40,24 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /produtos/{id}", h.deleleteProdutoHandler)
 }
 
+// @Summary List Comercial Produtos
+// @Tags Produtos
+// @Produce json
+// @Param nome query string false "Filter by nome (partial match)"
+// @Param categoria query string false "Filter by categoria"
+// @Param marca query string false "Filter by marca"
+// @Param offset query int false "Pagination offset (default 0)"
+// @Param limit query int false "Pagination limit (default 0)"
+// @Param sort query string false "Sort order: asc or desc"
+// @Param min-qnt-dsp query int false "Minimum qnt_disponivel"
+// @Param max-qnt-dsp query int false "Maximum qnt_disponivel"
+// @Param min-qnt-total query int false "Minimum qnt_total"
+// @Param max-qnt-total query int false "Maximum qnt_total"
+// @Param min-preco-venda query number false "Minimum preco_venda"
+// @Param max-preco-venda query number false "Maximum preco_venda"
+// @Success 200 {array} model.Comercial
+// @Failure 500 {object} map[string]string
+// @Router /produtos/comercial [get]
 func (h *Handler) getAllComercialHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -56,6 +74,22 @@ func (h *Handler) getAllComercialHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// @Summary List Estrutural Produtos
+// @Tags Produtos
+// @Produce json
+// @Param nome query string false "Filter by nome (partial match)"
+// @Param categoria query string false "Filter by categoria"
+// @Param marca query string false "Filter by marca"
+// @Param offset query int false "Pagination offset (default 0)"
+// @Param limit query int false "Pagination limit (default 0)"
+// @Param sort query string false "Sort order: asc or desc"
+// @Param min-qnt-dsp query int false "Minimum qnt_disponivel"
+// @Param max-qnt-dsp query int false "Maximum qnt_disponivel"
+// @Param min-qnt-total query int false "Minimum qnt_total"
+// @Param max-qnt-total query int false "Maximum qnt_total"
+// @Success 200 {array} model.Estrutural
+// @Failure 500 {object} map[string]string
+// @Router /produtos/estrutural [get]
 func (h *Handler) getAllEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -72,6 +106,15 @@ func (h *Handler) getAllEstruturalHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// @Summary Create Comercial Produto
+// @Tags Produtos
+// @Accept json
+// @Produce json
+// @Param produto body model.ProdutoComercialPayload true "Comercial product payload"
+// @Success 201 {object} model.Comercial
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /produtos/comercial [post]
 func (h *Handler) createComercialHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -97,6 +140,15 @@ func (h *Handler) createComercialHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// @Summary Create Estrutural Produto
+// @Tags Produtos
+// @Accept json
+// @Produce json
+// @Param produto body model.ProdutoEstruturalPayload true "Estrutural product payload"
+// @Success 201 {object} model.Estrutural
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /produtos/estrutural [post]
 func (h *Handler) createEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -118,6 +170,16 @@ func (h *Handler) createEstruturalHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// @Summary Update Comercial Produto
+// @Tags Produtos
+// @Accept json
+// @Produce json
+// @Param id path int true "Produto ID"
+// @Param produto body model.ProdutoComercialPayload true "Comercial product payload"
+// @Success 200 {object} model.Comercial
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /produtos/comercial/{id} [put]
 func (h *Handler) updateComercialHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -145,6 +207,16 @@ func (h *Handler) updateComercialHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// @Summary Update Estrutural Produto
+// @Tags Produtos
+// @Accept json
+// @Produce json
+// @Param id path int true "Produto ID"
+// @Param produto body model.ProdutoEstruturalPayload true "Estrutural product payload"
+// @Success 200 {object} model.Estrutural
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /produtos/estrutural/{id} [put]
 func (h *Handler) updateEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -172,6 +244,14 @@ func (h *Handler) updateEstruturalHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// @Summary Get Comercial Produto by ID
+// @Tags Produtos
+// @Produce json
+// @Param id path int true "Produto ID"
+// @Success 200 {object} model.Comercial
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /produtos/comercial/{id} [get]
 func (h *Handler) getComercialHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -193,6 +273,14 @@ func (h *Handler) getComercialHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Get Estrutural Produto by ID
+// @Tags Produtos
+// @Produce json
+// @Param id path int true "Produto ID"
+// @Success 200 {object} model.Estrutural
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /produtos/estrutural/{id} [get]
 func (h *Handler) getEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -214,6 +302,13 @@ func (h *Handler) getEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Delete Produto
+// @Tags Produtos
+// @Param id path int true "Produto ID"
+// @Success 204 {string} string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /produtos/{id} [delete]
 func (h *Handler) deleleteProdutoHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()

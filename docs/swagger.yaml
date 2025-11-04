@@ -1,7 +1,646 @@
+definitions:
+  model.Comercial:
+    properties:
+      categoria:
+        type: string
+      id:
+        type: integer
+      marca:
+        type: string
+      nome:
+        type: string
+      preco_venda:
+        type: number
+      qnt_disponivel:
+        type: integer
+      qnt_total:
+        type: integer
+    type: object
+  model.Estrutural:
+    properties:
+      categoria:
+        type: string
+      id:
+        type: integer
+      marca:
+        type: string
+      nome:
+        type: string
+      qnt_disponivel:
+        type: integer
+      qnt_total:
+        type: integer
+    type: object
+  model.Fornecedor:
+    properties:
+      cnpj:
+        type: string
+      id:
+        type: integer
+      nome:
+        type: string
+    type: object
+  model.FornecedorPayload:
+    properties:
+      cnpj:
+        type: string
+      nome:
+        type: string
+    type: object
+  model.ProdutoComercialPayload:
+    properties:
+      categoria:
+        type: string
+      marca:
+        type: string
+      nome:
+        type: string
+      preco_venda:
+        type: number
+      qnt_disponivel:
+        type: integer
+      qnt_total:
+        type: integer
+    type: object
+  model.ProdutoEstruturalPayload:
+    properties:
+      categoria:
+        type: string
+      marca:
+        type: string
+      nome:
+        type: string
+      qnt_disponivel:
+        type: integer
+      qnt_total:
+        type: integer
+    type: object
 info:
   contact: {}
   description: Aplicação de Banco de Dados para Gerenciamento de Bares
   title: EDNA Bar System
   version: "1.0"
-paths: {}
+paths:
+  /:
+    get:
+      description: Returns a 404 JSON response for unmatched routes.
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Unmatched path handler
+      tags:
+      - Server
+  /fornecedores:
+    get:
+      parameters:
+      - description: Filter by nome (partial match)
+        in: query
+        name: nome
+        type: string
+      - description: Pagination offset (default 0)
+        in: query
+        name: offset
+        type: integer
+      - description: Pagination limit (default 10)
+        in: query
+        name: limit
+        type: integer
+      - description: 'Sort order: asc or desc'
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Fornecedor'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List Fornecedores
+      tags:
+      - Fornecedor
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Fornecedor payload
+        in: body
+        name: fornecedor
+        required: true
+        schema:
+          $ref: '#/definitions/model.FornecedorPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Fornecedor'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create Fornecedor
+      tags:
+      - Fornecedor
+  /fornecedores/{id}:
+    delete:
+      parameters:
+      - description: Fornecedor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Fornecedor'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete Fornecedor
+      tags:
+      - Fornecedor
+    get:
+      parameters:
+      - description: Fornecedor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Fornecedor'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Fornecedor by ID
+      tags:
+      - Fornecedor
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Fornecedor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fornecedor payload
+        in: body
+        name: fornecedor
+        required: true
+        schema:
+          $ref: '#/definitions/model.FornecedorPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Fornecedor'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update Fornecedor
+      tags:
+      - Fornecedor
+  /health:
+    get:
+      description: Returns the health status of the application and dependencies.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Check health of the system
+      tags:
+      - Server
+  /produtos/{id}:
+    delete:
+      parameters:
+      - description: Produto ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete Produto
+      tags:
+      - Produtos
+  /produtos/comercial:
+    get:
+      parameters:
+      - description: Filter by nome (partial match)
+        in: query
+        name: nome
+        type: string
+      - description: Filter by categoria
+        in: query
+        name: categoria
+        type: string
+      - description: Filter by marca
+        in: query
+        name: marca
+        type: string
+      - description: Pagination offset (default 0)
+        in: query
+        name: offset
+        type: integer
+      - description: Pagination limit (default 0)
+        in: query
+        name: limit
+        type: integer
+      - description: 'Sort order: asc or desc'
+        in: query
+        name: sort
+        type: string
+      - description: Minimum qnt_disponivel
+        in: query
+        name: min-qnt-dsp
+        type: integer
+      - description: Maximum qnt_disponivel
+        in: query
+        name: max-qnt-dsp
+        type: integer
+      - description: Minimum qnt_total
+        in: query
+        name: min-qnt-total
+        type: integer
+      - description: Maximum qnt_total
+        in: query
+        name: max-qnt-total
+        type: integer
+      - description: Minimum preco_venda
+        in: query
+        name: min-preco-venda
+        type: number
+      - description: Maximum preco_venda
+        in: query
+        name: max-preco-venda
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Comercial'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List Comercial products
+      tags:
+      - Produtos
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Comercial product payload
+        in: body
+        name: produto
+        required: true
+        schema:
+          $ref: '#/definitions/model.ProdutoComercialPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Comercial'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create Comercial Produto
+      tags:
+      - Produtos
+  /produtos/comercial/{id}:
+    get:
+      parameters:
+      - description: Produto ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Comercial'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Comercial Produto by ID
+      tags:
+      - Produtos
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Produto ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Comercial product payload
+        in: body
+        name: produto
+        required: true
+        schema:
+          $ref: '#/definitions/model.ProdutoComercialPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Comercial'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update Comercial Produto
+      tags:
+      - Produtos
+  /produtos/estrutural:
+    get:
+      parameters:
+      - description: Filter by nome (partial match)
+        in: query
+        name: nome
+        type: string
+      - description: Filter by categoria
+        in: query
+        name: categoria
+        type: string
+      - description: Filter by marca
+        in: query
+        name: marca
+        type: string
+      - description: Pagination offset (default 0)
+        in: query
+        name: offset
+        type: integer
+      - description: Pagination limit (default 0)
+        in: query
+        name: limit
+        type: integer
+      - description: 'Sort order: asc or desc'
+        in: query
+        name: sort
+        type: string
+      - description: Minimum qnt_disponivel
+        in: query
+        name: min-qnt-dsp
+        type: integer
+      - description: Maximum qnt_disponivel
+        in: query
+        name: max-qnt-dsp
+        type: integer
+      - description: Minimum qnt_total
+        in: query
+        name: min-qnt-total
+        type: integer
+      - description: Maximum qnt_total
+        in: query
+        name: max-qnt-total
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Estrutural'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List Estrutural products
+      tags:
+      - Produtos
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Estrutural product payload
+        in: body
+        name: produto
+        required: true
+        schema:
+          $ref: '#/definitions/model.ProdutoEstruturalPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Estrutural'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create Estrutural Produto
+      tags:
+      - Produtos
+  /produtos/estrutural/{id}:
+    get:
+      parameters:
+      - description: Produto ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Estrutural'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Estrutural Produto by ID
+      tags:
+      - Produtos
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Produto ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Estrutural product payload
+        in: body
+        name: produto
+        required: true
+        schema:
+          $ref: '#/definitions/model.ProdutoEstruturalPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Estrutural'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update Estrutural Produto
+      tags:
+      - Produtos
 swagger: "2.0"

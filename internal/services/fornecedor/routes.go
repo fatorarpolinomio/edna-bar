@@ -35,7 +35,16 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /fornecedores/{id}", h.deleteFornecedorHandler)
 }
 
-// @summary Query all Fornecedores, allows filter, sorting and pagination
+// @Summary List Fornecedores
+// @Tags Fornecedor
+// @Produce json
+// @Param nome query string false "Filter by nome (partial match)"
+// @Param offset query int false "Pagination offset (default 0)"
+// @Param limit query int false "Pagination limit (default 10)"
+// @Param sort query string false "Sort order: asc or desc"
+// @Success 200 {array} model.Fornecedor
+// @Failure 500 {object} map[string]string
+// @Router /fornecedores [get]
 func (h *Handler) getAllFornecedoresHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -52,6 +61,15 @@ func (h *Handler) getAllFornecedoresHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// @Summary Create Fornecedor
+// @Tags Fornecedor
+// @Accept json
+// @Produce json
+// @Param fornecedor body model.FornecedorPayload true "Fornecedor payload"
+// @Success 201 {object} model.Fornecedor
+// @Failure 400 {object} map[string]string
+// @Failure 422 {object} map[string]string
+// @Router /fornecedores [post]
 func (h *Handler) createFornecedoresHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -78,6 +96,15 @@ func (h *Handler) createFornecedoresHandler(w http.ResponseWriter, r *http.Reque
 	util.WriteJSON(w, http.StatusCreated, model)
 }
 
+// @Summary Get Fornecedor by ID
+// @Tags Fornecedor
+// @Produce json
+// @Param id path int true "Fornecedor ID"
+// @Success 200 {object} model.Fornecedor
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /fornecedores/{id} [get]
 func (h *Handler) fetchFornecedorHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -104,6 +131,16 @@ func (h *Handler) fetchFornecedorHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// @Summary Update Fornecedor
+// @Tags Fornecedor
+// @Accept json
+// @Produce json
+// @Param id path int true "Fornecedor ID"
+// @Param fornecedor body model.FornecedorPayload true "Fornecedor payload"
+// @Success 200 {object} model.Fornecedor
+// @Failure 400 {object} map[string]string
+// @Failure 422 {object} map[string]string
+// @Router /fornecedores/{id} [put]
 func (h *Handler) updateFornecedorHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -132,6 +169,14 @@ func (h *Handler) updateFornecedorHandler(w http.ResponseWriter, r *http.Request
 	util.WriteJSON(w, http.StatusOK, model)
 }
 
+// @Summary Delete Fornecedor
+// @Tags Fornecedor
+// @Produce json
+// @Param id path int true "Fornecedor ID"
+// @Success 200 {object} model.Fornecedor
+// @Failure 400 {object} map[string]string
+// @Failure 422 {object} map[string]string
+// @Router /fornecedores/{id} [delete]
 func (h *Handler) deleteFornecedorHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
