@@ -1,6 +1,7 @@
 package util
 
 import (
+	"edna/internal/types"
 	"encoding/json"
 	"errors"
 	"log"
@@ -48,7 +49,7 @@ func ErrorJSON(w http.ResponseWriter, msg string, status int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	res, err := json.Marshal(map[string]string{"message": msg})
+	res, err := json.Marshal(types.NewErrorResponse(msg))
 	// Impossivel
 	if err != nil {
 		log.Printf("Error ao criar mensagem em json: %s", err)

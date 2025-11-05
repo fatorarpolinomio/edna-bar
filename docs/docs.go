@@ -50,8 +50,20 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Filter by nome (partial match)",
-                        "name": "nome",
+                        "description": "Filter by nome using operators: like, ilike, eq, ne. Format: operator.value (e.g. like.João)",
+                        "name": "filter-nome",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by cnpj using operators: eq, ne, like, ilike. Format: operator.value (e.g. eq.123456789)",
+                        "name": "filter-cnpj",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort fields: nome, cnpj. Prefix with '-' for desc. Comma separated for multiple fields (e.g. -nome,cnpj)",
+                        "name": "sort",
                         "in": "query"
                     },
                     {
@@ -64,12 +76,6 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Pagination limit (default 10)",
                         "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Sort order: asc or desc",
-                        "name": "sort",
                         "in": "query"
                     }
                 ],
@@ -86,10 +92,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -112,7 +115,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.FornecedorPayload"
+                            "$ref": "#/definitions/model.FornecedorCreate"
                         }
                     }
                 ],
@@ -126,19 +129,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -172,28 +169,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -223,7 +211,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.FornecedorPayload"
+                            "$ref": "#/definitions/model.FornecedorCreate"
                         }
                     }
                 ],
@@ -237,19 +225,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -281,19 +263,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -329,7 +305,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/produtos/comercial": {
+        "/produtos": {
             "get": {
                 "produces": [
                     "application/json"
@@ -337,24 +313,30 @@ const docTemplate = `{
                 "tags": [
                     "Produtos"
                 ],
-                "summary": "List Comercial products",
+                "summary": "List Produtos (all types)",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Filter by nome (partial match)",
-                        "name": "nome",
+                        "description": "Filter by nome. Format: \u003cop\u003e.\u003cvalue\u003e. Ops: like, ilike, eq, ne",
+                        "name": "filter-nome",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Filter by categoria",
-                        "name": "categoria",
+                        "description": "Filter by categoria. Format: \u003cop\u003e.\u003cvalue\u003e. Ops: like, ilike, eq, ne",
+                        "name": "filter-categoria",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Filter by marca",
-                        "name": "marca",
+                        "description": "Filter by marca. Format: \u003cop\u003e.\u003cvalue\u003e. Ops: like, ilike, eq, ne",
+                        "name": "filter-marca",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort by attribute. Allowed: nome, categoria, marca. Prefix '-' for desc. Comma separated",
+                        "name": "sort",
                         "in": "query"
                     },
                     {
@@ -368,47 +350,126 @@ const docTemplate = `{
                         "description": "Pagination limit (default 0)",
                         "name": "limit",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.UnionProduto"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "Create Produto",
+                "parameters": [
+                    {
+                        "description": "Product payload",
+                        "name": "produto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ProdutoCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Produto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/produtos/comercial": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Produtos"
+                ],
+                "summary": "List Comercial products",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by nome. Format: \u003cop\u003e.\u003cvalue\u003e. Ops: like, ilike, eq, ne",
+                        "name": "filter-nome",
+                        "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Sort order: asc or desc",
+                        "description": "Filter by categoria. Format: \u003cop\u003e.\u003cvalue\u003e. Ops: like, ilike, eq, ne",
+                        "name": "filter-categoria",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by marca. Format: \u003cop\u003e.\u003cvalue\u003e. Ops: like, ilike, eq, ne",
+                        "name": "filter-marca",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Filter by preco_venda. Format: \u003cop\u003e.\u003cvalue\u003e. Ops: eq, ne, lt, gt, le, ge",
+                        "name": "filter-preco_venda",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort fields: nome, categoria, marca, preco_venda. Prefix '-' for desc. Comma separated",
                         "name": "sort",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Minimum qnt_disponivel",
-                        "name": "min-qnt-dsp",
+                        "description": "Pagination offset (default 0)",
+                        "name": "offset",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Maximum qnt_disponivel",
-                        "name": "max-qnt-dsp",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Minimum qnt_total",
-                        "name": "min-qnt-total",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Maximum qnt_total",
-                        "name": "max-qnt-total",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
-                        "description": "Minimum preco_venda",
-                        "name": "min-preco-venda",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
-                        "description": "Maximum preco_venda",
-                        "name": "max-preco-venda",
+                        "description": "Pagination limit (default 0)",
+                        "name": "limit",
                         "in": "query"
                     }
                 ],
@@ -425,10 +486,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -451,7 +509,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.ProdutoComercialPayload"
+                            "$ref": "#/definitions/model.ComercialCreate"
                         }
                     }
                 ],
@@ -465,19 +523,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -511,19 +563,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -553,7 +599,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.ProdutoComercialPayload"
+                            "$ref": "#/definitions/model.ComercialCreate"
                         }
                     }
                 ],
@@ -567,19 +613,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -597,20 +637,26 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Filter by nome (partial match)",
-                        "name": "nome",
+                        "description": "Filter by nome. Format: \u003cop\u003e.\u003cvalue\u003e. Ops: like, ilike, eq, ne",
+                        "name": "filter-nome",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Filter by categoria",
-                        "name": "categoria",
+                        "description": "Filter by categoria. Format: \u003cop\u003e.\u003cvalue\u003e. Ops: like, ilike, eq, ne",
+                        "name": "filter-categoria",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Filter by marca",
-                        "name": "marca",
+                        "description": "Filter by marca. Format: \u003cop\u003e.\u003cvalue\u003e. Ops: like, ilike, eq, ne",
+                        "name": "filter-marca",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort fields: nome, categoria, marca. Prefix '-' for desc. Comma separated",
+                        "name": "sort",
                         "in": "query"
                     },
                     {
@@ -624,36 +670,6 @@ const docTemplate = `{
                         "description": "Pagination limit (default 0)",
                         "name": "limit",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Sort order: asc or desc",
-                        "name": "sort",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Minimum qnt_disponivel",
-                        "name": "min-qnt-dsp",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Maximum qnt_disponivel",
-                        "name": "max-qnt-dsp",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Minimum qnt_total",
-                        "name": "min-qnt-total",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Maximum qnt_total",
-                        "name": "max-qnt-total",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -662,72 +678,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Estrutural"
+                                "$ref": "#/definitions/model.Produto"
                             }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Produtos"
-                ],
-                "summary": "Create Estrutural Produto",
-                "parameters": [
-                    {
-                        "description": "Estrutural product payload",
-                        "name": "produto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.ProdutoEstruturalPayload"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/model.Estrutural"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/produtos/estrutural/{id}": {
+        "/produtos/{id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -735,7 +699,7 @@ const docTemplate = `{
                 "tags": [
                     "Produtos"
                 ],
-                "summary": "Get Estrutural Produto by ID",
+                "summary": "Get Produto by ID",
                 "parameters": [
                     {
                         "type": "integer",
@@ -749,25 +713,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Estrutural"
+                            "$ref": "#/definitions/model.Produto"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -782,7 +740,7 @@ const docTemplate = `{
                 "tags": [
                     "Produtos"
                 ],
-                "summary": "Update Estrutural Produto",
+                "summary": "Update Produto",
                 "parameters": [
                     {
                         "type": "integer",
@@ -792,12 +750,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Estrutural product payload",
+                        "description": "Product payload",
                         "name": "produto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.ProdutoEstruturalPayload"
+                            "$ref": "#/definitions/model.ProdutoCreate"
                         }
                     }
                 ],
@@ -805,31 +763,23 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Estrutural"
+                            "$ref": "#/definitions/model.Produto"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
-            }
-        },
-        "/produtos/{id}": {
+            },
             "delete": {
                 "tags": [
                     "Produtos"
@@ -854,19 +804,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/types.ErrorResponse"
                         }
                     }
                 }
@@ -891,23 +835,14 @@ const docTemplate = `{
                 },
                 "preco_venda": {
                     "type": "number"
-                },
-                "qnt_disponivel": {
-                    "type": "integer"
-                },
-                "qnt_total": {
-                    "type": "integer"
                 }
             }
         },
-        "model.Estrutural": {
+        "model.ComercialCreate": {
             "type": "object",
             "properties": {
                 "categoria": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "marca": {
                     "type": "string"
@@ -915,11 +850,8 @@ const docTemplate = `{
                 "nome": {
                     "type": "string"
                 },
-                "qnt_disponivel": {
-                    "type": "integer"
-                },
-                "qnt_total": {
-                    "type": "integer"
+                "preco_venda": {
+                    "type": "number"
                 }
             }
         },
@@ -937,7 +869,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.FornecedorPayload": {
+        "model.FornecedorCreate": {
             "type": "object",
             "properties": {
                 "cnpj": {
@@ -948,11 +880,45 @@ const docTemplate = `{
                 }
             }
         },
-        "model.ProdutoComercialPayload": {
+        "model.Produto": {
             "type": "object",
             "properties": {
                 "categoria": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "marca": {
+                    "type": "string"
+                },
+                "nome": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ProdutoCreate": {
+            "type": "object",
+            "properties": {
+                "categoria": {
+                    "type": "string"
+                },
+                "marca": {
+                    "type": "string"
+                },
+                "nome": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UnionProduto": {
+            "type": "object",
+            "properties": {
+                "categoria": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "marca": {
                     "type": "string"
@@ -962,32 +928,14 @@ const docTemplate = `{
                 },
                 "preco_venda": {
                     "type": "number"
-                },
-                "qnt_disponivel": {
-                    "type": "integer"
-                },
-                "qnt_total": {
-                    "type": "integer"
                 }
             }
         },
-        "model.ProdutoEstruturalPayload": {
+        "types.ErrorResponse": {
             "type": "object",
             "properties": {
-                "categoria": {
+                "detail": {
                     "type": "string"
-                },
-                "marca": {
-                    "type": "string"
-                },
-                "nome": {
-                    "type": "string"
-                },
-                "qnt_disponivel": {
-                    "type": "integer"
-                },
-                "qnt_total": {
-                    "type": "integer"
                 }
             }
         }

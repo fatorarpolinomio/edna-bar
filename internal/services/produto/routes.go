@@ -13,14 +13,15 @@ type Handler struct {
 }
 
 type ProdutoStore interface {
-	GetAllComercial(ctx context.Context, filter *model.ComercialFilter) ([]model.Comercial, error)
-	GetAllEstrutural(ctx context.Context, filter *model.EstruturalFilter) ([]model.Estrutural, error)
+	GetAll(ctx context.Context, filter *util.Filter) ([]model.UnionProduto, error)
+	GetAllComercial(ctx context.Context, filter *util.Filter) ([]model.Comercial, error)
+	GetAllEstrutural(ctx context.Context, filter *util.Filter) ([]model.Produto, error)
 	CreateComercial(ctx context.Context, props *model.Comercial) error
-	CreateEstrutural(ctx context.Context, props *model.Estrutural) error
-	UpdateComercial(ctx context.Context, id int64, props *model.Comercial) error
-	UpdateEstrutural(ctx context.Context, id int64, props *model.Estrutural) error
+	Create(ctx context.Context, props *model.Produto) error
+	UpdateComercial(ctx context.Context, props *model.Comercial) error
+	Update(ctx context.Context, props *model.Produto) error
 	GetComercialByID(ctx context.Context, id int64) (*model.Comercial, error)
-	GetEstruturalByID(ctx context.Context, id int64) (*model.Estrutural, error)
+	GetByID(ctx context.Context, id int64) (*model.Produto, error)
 	Delete(ctx context.Context, id int64) error
 }
 
@@ -29,41 +30,75 @@ func NewHandler(store ProdutoStore) Handler {
 }
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /produtos/comercial", h.getAllComercialHandler)
+	mux.HandleFunc("GET /produtos", h.getAll)
+	mux.HandleFunc("POST /produtos", h.createEstruturalHandler)
+	mux.HandleFunc("GET /produtos/{id}", h.getEstruturalHandler)
+	mux.HandleFunc("PUT /produtos/{id}", h.updateEstruturalHandler)
+	mux.HandleFunc("DELETE /produtos/{id}", h.deleteProdutoHandler)
+
 	mux.HandleFunc("GET /produtos/estrutural", h.getAllEstruturalHandler)
+	mux.HandleFunc("GET /produtos/comercial", h.getAllComercialHandler)
 	mux.HandleFunc("POST /produtos/comercial", h.createComercialHandler)
-	mux.HandleFunc("POST /produtos/estrutural", h.createEstruturalHandler)
-	mux.HandleFunc("PUT /produtos/comercial/{id}", h.updateComercialHandler)
-	mux.HandleFunc("PUT /produtos/estrutural/{id}", h.updateEstruturalHandler)
 	mux.HandleFunc("GET /produtos/comercial/{id}", h.getComercialHandler)
-	mux.HandleFunc("GET /produtos/estrutural/{id}", h.getEstruturalHandler)
-	mux.HandleFunc("DELETE /produtos/{id}", h.deleleteProdutoHandler)
+	mux.HandleFunc("PUT /produtos/comercial/{id}", h.updateComercialHandler)
 }
 
-// @Summary List Comercial Produtos
+ // @Summary List Produtos (all types)
+ // @Tags Produtos
+ // @Produce json
+ // @Param filter-nome query string false "Filter by nome. Format: <op>.<value>. Ops: like, ilike, eq, ne"
+ // @Param filter-categoria query string false "Filter by categoria. Format: <op>.<value>. Ops: like, ilike, eq, ne"
+ // @Param filter-marca query string false "Filter by marca. Format: <op>.<value>. Ops: like, ilike, eq, ne"
+ // @Param sort query string false "Sort by attribute. Allowed: nome, categoria, marca. Prefix '-' for desc. Comma separated"
+ // @Param offset query int false "Pagination offset (default 0)"
+ // @Param limit query int false "Pagination limit (default 0)"
+ // @Success 200 {array} model.UnionProduto
+ // @Failure 400 {object} types.ErrorResponse
+ // @Failure 500 {object} types.ErrorResponse
+ // @Router /produtos [get]
+func (h *Handler) getAll(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), util.RequestTimeout)
+	defer cancel()
+
+	// WARN: Não é possivel acessar atributos do comercial
+	filter, err := NewProdutoFilter(r.URL.Query())
+	if err != nil {
+		util.ErrorJSON(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	produtos, err := h.store.GetAll(ctx, &filter)
+	if err != nil {
+		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	util.WriteJSON(w, http.StatusOK, produtos)
+}
+
+// @Summary List Comercial products
 // @Tags Produtos
 // @Produce json
-// @Param nome query string false "Filter by nome (partial match)"
-// @Param categoria query string false "Filter by categoria"
-// @Param marca query string false "Filter by marca"
+// @Param filter-nome query string false "Filter by nome. Format: <op>.<value>. Ops: like, ilike, eq, ne"
+// @Param filter-categoria query string false "Filter by categoria. Format: <op>.<value>. Ops: like, ilike, eq, ne"
+// @Param filter-marca query string false "Filter by marca. Format: <op>.<value>. Ops: like, ilike, eq, ne"
+// @Param filter-preco_venda query number false "Filter by preco_venda. Format: <op>.<value>. Ops: eq, ne, lt, gt, le, ge"
+// @Param sort query string false "Sort fields: nome, categoria, marca, preco_venda. Prefix '-' for desc. Comma separated"
 // @Param offset query int false "Pagination offset (default 0)"
 // @Param limit query int false "Pagination limit (default 0)"
-// @Param sort query string false "Sort order: asc or desc"
-// @Param min-qnt-dsp query int false "Minimum qnt_disponivel"
-// @Param max-qnt-dsp query int false "Maximum qnt_disponivel"
-// @Param min-qnt-total query int false "Minimum qnt_total"
-// @Param max-qnt-total query int false "Maximum qnt_total"
-// @Param min-preco-venda query number false "Minimum preco_venda"
-// @Param max-preco-venda query number false "Maximum preco_venda"
 // @Success 200 {array} model.Comercial
-// @Failure 500 {object} map[string]string
+// @Failure 500 {object} types.ErrorResponse
 // @Router /produtos/comercial [get]
 func (h *Handler) getAllComercialHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 
-	filter := model.NewComercialFilter(r.URL)
-	produtos, err := h.store.GetAllComercial(ctx, filter)
+	filter, err := NewComercialFilter(r.URL.Query())
+	if err != nil {
+		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	produtos, err := h.store.GetAllComercial(ctx, &filter)
 	if err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -74,28 +109,29 @@ func (h *Handler) getAllComercialHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// @Summary List Estrutural Produtos
+// @Summary List Estrutural products
 // @Tags Produtos
 // @Produce json
-// @Param nome query string false "Filter by nome (partial match)"
-// @Param categoria query string false "Filter by categoria"
-// @Param marca query string false "Filter by marca"
+// @Param filter-nome query string false "Filter by nome. Format: <op>.<value>. Ops: like, ilike, eq, ne"
+// @Param filter-categoria query string false "Filter by categoria. Format: <op>.<value>. Ops: like, ilike, eq, ne"
+// @Param filter-marca query string false "Filter by marca. Format: <op>.<value>. Ops: like, ilike, eq, ne"
+// @Param sort query string false "Sort fields: nome, categoria, marca. Prefix '-' for desc. Comma separated"
 // @Param offset query int false "Pagination offset (default 0)"
 // @Param limit query int false "Pagination limit (default 0)"
-// @Param sort query string false "Sort order: asc or desc"
-// @Param min-qnt-dsp query int false "Minimum qnt_disponivel"
-// @Param max-qnt-dsp query int false "Maximum qnt_disponivel"
-// @Param min-qnt-total query int false "Minimum qnt_total"
-// @Param max-qnt-total query int false "Maximum qnt_total"
-// @Success 200 {array} model.Estrutural
-// @Failure 500 {object} map[string]string
+// @Success 200 {array} model.Produto
+// @Failure 500 {object} types.ErrorResponse
 // @Router /produtos/estrutural [get]
 func (h *Handler) getAllEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 
-	filter := model.NewEstruturalFilter(r.URL)
-	produtos, err := h.store.GetAllEstrutural(ctx, filter)
+	filter, err := NewProdutoFilter(r.URL.Query())
+	if err != nil {
+		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	produtos, err := h.store.GetAllEstrutural(ctx, &filter)
 	if err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -110,23 +146,23 @@ func (h *Handler) getAllEstruturalHandler(w http.ResponseWriter, r *http.Request
 // @Tags Produtos
 // @Accept json
 // @Produce json
-// @Param produto body model.ProdutoComercialPayload true "Comercial product payload"
+// @Param produto body model.ComercialCreate true "Comercial product payload"
 // @Success 201 {object} model.Comercial
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
 // @Router /produtos/comercial [post]
 func (h *Handler) createComercialHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 
-	payload := model.ProdutoComercialPayload{}
+	payload := model.ComercialCreate{}
 	if err := util.ReadJSON(r, &payload); err != nil {
 		util.ErrorJSON(w, "Failed to decode request body", http.StatusBadRequest)
 		return
 	}
 
-	produto := model.NewComercial(payload)
-	if err := h.store.CreateComercial(ctx, produto); err != nil {
+	produto := payload.ToComercial()
+	if err := h.store.CreateComercial(ctx, &produto); err != nil {
 		status := http.StatusInternalServerError
 		if err == types.ErrNotFound {
 			status = http.StatusNotFound
@@ -140,27 +176,27 @@ func (h *Handler) createComercialHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// @Summary Create Estrutural Produto
+// @Summary Create Produto
 // @Tags Produtos
 // @Accept json
 // @Produce json
-// @Param produto body model.ProdutoEstruturalPayload true "Estrutural product payload"
-// @Success 201 {object} model.Estrutural
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /produtos/estrutural [post]
+// @Param produto body model.ProdutoCreate true "Product payload"
+// @Success 201 {object} model.Produto
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /produtos [post]
 func (h *Handler) createEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 
-	payload := model.ProdutoEstruturalPayload{}
+	payload := model.ProdutoCreate{}
 	if err := util.ReadJSON(r, &payload); err != nil {
 		util.ErrorJSON(w, "Failed to decode request body", http.StatusBadRequest)
 		return
 	}
 
-	produto := model.NewEstrutural(payload)
-	if err := h.store.CreateEstrutural(ctx, produto); err != nil {
+	produto := payload.ToProduto()
+	if err := h.store.Create(ctx, &produto); err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -175,10 +211,10 @@ func (h *Handler) createEstruturalHandler(w http.ResponseWriter, r *http.Request
 // @Accept json
 // @Produce json
 // @Param id path int true "Produto ID"
-// @Param produto body model.ProdutoComercialPayload true "Comercial product payload"
+// @Param produto body model.ComercialCreate true "Comercial product payload"
 // @Success 200 {object} model.Comercial
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
 // @Router /produtos/comercial/{id} [put]
 func (h *Handler) updateComercialHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
@@ -190,14 +226,15 @@ func (h *Handler) updateComercialHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	payload := model.ProdutoComercialPayload{}
+	payload := model.ComercialCreate{}
 	if err := util.ReadJSON(r, &payload); err != nil {
 		util.ErrorJSON(w, "Failed to decode request body", http.StatusBadRequest)
 		return
 	}
 
-	produto := model.NewComercial(payload)
-	if err := h.store.UpdateComercial(ctx, id, produto); err != nil {
+	produto := payload.ToComercial()
+	produto.Id = id
+	if err := h.store.UpdateComercial(ctx, &produto); err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -207,16 +244,16 @@ func (h *Handler) updateComercialHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// @Summary Update Estrutural Produto
+// @Summary Update Produto
 // @Tags Produtos
 // @Accept json
 // @Produce json
 // @Param id path int true "Produto ID"
-// @Param produto body model.ProdutoEstruturalPayload true "Estrutural product payload"
-// @Success 200 {object} model.Estrutural
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /produtos/estrutural/{id} [put]
+// @Param produto body model.ProdutoCreate true "Product payload"
+// @Success 200 {object} model.Produto
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /produtos/{id} [put]
 func (h *Handler) updateEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -227,14 +264,15 @@ func (h *Handler) updateEstruturalHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	payload := model.ProdutoEstruturalPayload{}
+	payload := model.ProdutoCreate{}
 	if err := util.ReadJSON(r, &payload); err != nil {
 		util.ErrorJSON(w, "Failed to decode request body", http.StatusBadRequest)
 		return
 	}
 
-	produto := model.NewEstrutural(payload)
-	if err := h.store.UpdateEstrutural(ctx, id, produto); err != nil {
+	produto := payload.ToProduto()
+	produto.Id = id
+	if err := h.store.Update(ctx, &produto); err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -249,8 +287,8 @@ func (h *Handler) updateEstruturalHandler(w http.ResponseWriter, r *http.Request
 // @Produce json
 // @Param id path int true "Produto ID"
 // @Success 200 {object} model.Comercial
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
 // @Router /produtos/comercial/{id} [get]
 func (h *Handler) getComercialHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
@@ -273,14 +311,14 @@ func (h *Handler) getComercialHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// @Summary Get Estrutural Produto by ID
+// @Summary Get Produto by ID
 // @Tags Produtos
 // @Produce json
 // @Param id path int true "Produto ID"
-// @Success 200 {object} model.Estrutural
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /produtos/estrutural/{id} [get]
+// @Success 200 {object} model.Produto
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /produtos/{id} [get]
 func (h *Handler) getEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
@@ -291,7 +329,7 @@ func (h *Handler) getEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	produto, err := h.store.GetEstruturalByID(ctx, id)
+	produto, err := h.store.GetByID(ctx, id)
 	if err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -306,10 +344,10 @@ func (h *Handler) getEstruturalHandler(w http.ResponseWriter, r *http.Request) {
 // @Tags Produtos
 // @Param id path int true "Produto ID"
 // @Success 204 {string} string
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
 // @Router /produtos/{id} [delete]
-func (h *Handler) deleleteProdutoHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) deleteProdutoHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 

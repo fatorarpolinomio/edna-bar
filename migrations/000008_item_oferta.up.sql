@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS contem_item_oferta (
-    quantidade int NOT NULL,
+    quantidade int NOT NULL CHECK (quantidade > 0),
     id_produto int,
     id_oferta int,
     PRIMARY KEY (id_produto, id_oferta),

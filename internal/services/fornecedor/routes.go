@@ -15,7 +15,7 @@ type Handler struct {
 
 
 type FornecedorStore interface {
-	GetAll(ctx context.Context, filters model.FornecedorFilters) ([]model.Fornecedor, error)
+	GetAll(ctx context.Context, filter util.Filter) ([]model.Fornecedor, error)
 	Create(ctx context.Context, props *model.Fornecedor) error
 	GetByID(ctx context.Context, id int64) (*model.Fornecedor, error)
 	Update(ctx context.Context, props *model.Fornecedor) error
@@ -28,28 +28,33 @@ func NewHandler(store FornecedorStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /fornecedores", h.getAllFornecedoresHandler)
-	mux.HandleFunc("POST /fornecedores", h.createFornecedoresHandler)
-	mux.HandleFunc("GET /fornecedores/{id}", h.fetchFornecedorHandler)
-	mux.HandleFunc("PUT /fornecedores/{id}", h.updateFornecedorHandler)
-	mux.HandleFunc("DELETE /fornecedores/{id}", h.deleteFornecedorHandler)
+	mux.HandleFunc("GET /fornecedores", h.getAll)
+	mux.HandleFunc("POST /fornecedores", h.create)
+	mux.HandleFunc("GET /fornecedores/{id}", h.fetch)
+	mux.HandleFunc("PUT /fornecedores/{id}", h.update)
+	mux.HandleFunc("DELETE /fornecedores/{id}", h.delete)
 }
 
 // @Summary List Fornecedores
 // @Tags Fornecedor
 // @Produce json
-// @Param nome query string false "Filter by nome (partial match)"
+// @Param filter-nome query string false "Filter by nome using operators: like, ilike, eq, ne. Format: operator.value (e.g. like.João)"
+// @Param filter-cnpj query string false "Filter by cnpj using operators: eq, ne, like, ilike. Format: operator.value (e.g. eq.123456789)"
+// @Param sort query string false "Sort fields: nome, cnpj. Prefix with '-' for desc. Comma separated for multiple fields (e.g. -nome,cnpj)"
 // @Param offset query int false "Pagination offset (default 0)"
 // @Param limit query int false "Pagination limit (default 10)"
-// @Param sort query string false "Sort order: asc or desc"
 // @Success 200 {array} model.Fornecedor
-// @Failure 500 {object} map[string]string
+// @Failure 500 {object} types.ErrorResponse
 // @Router /fornecedores [get]
-func (h *Handler) getAllFornecedoresHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) getAll(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 
-	filters := model.NewFornecedorFilter(r.URL)
+	filters, err := NewFornecedorFilter(r.URL.Query())
+	if err != nil {
+		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	fornecedores, err := h.store.GetAll(ctx, filters)
 	if err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
@@ -65,12 +70,12 @@ func (h *Handler) getAllFornecedoresHandler(w http.ResponseWriter, r *http.Reque
 // @Tags Fornecedor
 // @Accept json
 // @Produce json
-// @Param fornecedor body model.FornecedorPayload true "Fornecedor payload"
+// @Param fornecedor body model.FornecedorCreate true "Fornecedor payload"
 // @Success 201 {object} model.Fornecedor
-// @Failure 400 {object} map[string]string
-// @Failure 422 {object} map[string]string
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 422 {object} types.ErrorResponse
 // @Router /fornecedores [post]
-func (h *Handler) createFornecedoresHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) create(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 
@@ -79,14 +84,14 @@ func (h *Handler) createFornecedoresHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var payload model.FornecedorPayload
+	var payload model.FornecedorCreate
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	model := model.FromPayload(payload)
+	model := payload.ToFornecedor()
 	err = h.store.Create(ctx, &model)
 	if err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusUnprocessableEntity)
@@ -101,11 +106,11 @@ func (h *Handler) createFornecedoresHandler(w http.ResponseWriter, r *http.Reque
 // @Produce json
 // @Param id path int true "Fornecedor ID"
 // @Success 200 {object} model.Fornecedor
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 404 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
 // @Router /fornecedores/{id} [get]
-func (h *Handler) fetchFornecedorHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) fetch(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 
@@ -136,12 +141,12 @@ func (h *Handler) fetchFornecedorHandler(w http.ResponseWriter, r *http.Request)
 // @Accept json
 // @Produce json
 // @Param id path int true "Fornecedor ID"
-// @Param fornecedor body model.FornecedorPayload true "Fornecedor payload"
+// @Param fornecedor body model.FornecedorCreate true "Fornecedor payload"
 // @Success 200 {object} model.Fornecedor
-// @Failure 400 {object} map[string]string
-// @Failure 422 {object} map[string]string
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 422 {object} types.ErrorResponse
 // @Router /fornecedores/{id} [put]
-func (h *Handler) updateFornecedorHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) update(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 
@@ -151,14 +156,14 @@ func (h *Handler) updateFornecedorHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var payload model.FornecedorPayload
+	var payload model.FornecedorCreate
 	err = json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	model := model.FromPayload(payload)
+	model := payload.ToFornecedor()
 	model.Id = id
 	err = h.store.Update(ctx, &model)
 	if err != nil {
@@ -174,10 +179,10 @@ func (h *Handler) updateFornecedorHandler(w http.ResponseWriter, r *http.Request
 // @Produce json
 // @Param id path int true "Fornecedor ID"
 // @Success 200 {object} model.Fornecedor
-// @Failure 400 {object} map[string]string
-// @Failure 422 {object} map[string]string
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 422 {object} types.ErrorResponse
 // @Router /fornecedores/{id} [delete]
-func (h *Handler) deleteFornecedorHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) delete(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), util.RequestTimeout)
 	defer cancel()
 

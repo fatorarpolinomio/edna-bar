@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"edna/internal/model"
 	"edna/internal/types"
-	"strconv"
+	"edna/internal/util"
 )
 
 type Store struct {
@@ -17,10 +17,10 @@ func NewStore(db *sql.DB) *Store {
 }
 
 
-func (s *Store) GetAll(ctx context.Context, filters model.FornecedorFilters) ([]model.Fornecedor, error) {
-	query := "SELECT id_fornecedor, nome, CNPJ FROM Fornecedor"
+func (s *Store) GetAll(ctx context.Context, filter util.Filter) ([]model.Fornecedor, error) {
+	query := "SELECT id_fornecedor, nome, CNPJ FROM Fornecedor AS f"
 
-	rows, err := s.queryRowsWithFilter(ctx, query, filters)
+	rows, err := util.QueryRowsWithFilter(s.db, ctx, query, &filter, "f")
 	if err != nil {
 		return nil, err
 	}
@@ -38,41 +38,6 @@ func (s *Store) GetAll(ctx context.Context, filters model.FornecedorFilters) ([]
 	return fornecedores, nil
 }
 
-/// Busca com base em um conjunto de filtros
-func (s *Store) queryRowsWithFilter(
-	ctx context.Context,
-	query string,
-	filter model.FornecedorFilters,
-) (*sql.Rows, error){
-
-	var filterValues []any
-
-	if filter.Nome != "" {
-		filterValues = append(filterValues, filter.Nome)
-		query += " WHERE nome LIKE '%' || $1 || '%'"
-	}
-
-	switch filter.Sort {
-	case "nome":
-		query += " ORDER BY nome"
-	case "cnpj":
-		query += " ORDER BY CNPJ"
-	default:
-		query += " ORDER BY id_fornecedor"
-	}
-
-	if filter.Offset > 0 {
-		filterValues = append(filterValues, filter.Offset)
-		query += " OFFSET $" + strconv.Itoa(len(filterValues))
-	}
-	if filter.Limit > 0 {
-		filterValues = append(filterValues, filter.Limit)
-		query += " LIMIT $" + strconv.Itoa(len(filterValues))
-	}
-	println(query)
-
-	return s.db.QueryContext(ctx, query, filterValues...)
-}
 
 func (s *Store) Create(ctx context.Context, props *model.Fornecedor) error {
 	query := "INSERT INTO Fornecedor (nome, CNPJ) VALUES ($1, $2) RETURNING id_fornecedor;"
@@ -113,7 +78,7 @@ func (s *Store) Update(ctx context.Context, props *model.Fornecedor) error {
 }
 
 func (s *Store) Delete(ctx context.Context, id int64) (*model.Fornecedor, error) {
-	query := "DELETE FROM Fornecedor WHERE id_fornecedor = $1 RETURNING *;"
+	query := "DELETE FROM Fornecedor WHERE id_fornecedor = $1 RETURNING id_fornecedor, nome, CNPJ;"
 
 	var model model.Fornecedor
 	row := s.db.QueryRowContext(ctx,query, id)

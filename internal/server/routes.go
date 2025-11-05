@@ -13,20 +13,23 @@ import (
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
+
+	v1 := http.NewServeMux()
 	mux := http.NewServeMux()
 
 	fornecedorHandler := fornecedor.NewHandler(s.fornecedorStore)
 	produtoHandler := produto.NewHandler(s.produtoStore)
-	// Register routes
-	mux.HandleFunc("/", s.trailingSlashHandler)
-	mux.HandleFunc("/health", s.healthHandler)
-	mux.Handle("/swagger/", httpSwagger.Handler())
 
+	mux.HandleFunc("/health", s.healthHandler)
 	fornecedorHandler.RegisterRoutes(mux)
 	produtoHandler.RegisterRoutes(mux)
 
+	// Register routes
+	v1.HandleFunc("/", s.trailingSlashHandler)
+	v1.Handle("/api/v1/", http.StripPrefix("/api/v1", mux))
+	v1.Handle("/swagger/", httpSwagger.Handler())
 	// Wrap the mux with CORS middleware
-	return s.logMiddleware(s.corsMiddleware(mux))
+	return s.logMiddleware(s.corsMiddleware(v1))
 }
 
 // @Summary Unmatched path handler
