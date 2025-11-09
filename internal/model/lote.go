@@ -1,24 +1,28 @@
 package model
 
+import (
+	"time"
+)
+
 type Lote struct {
-	Id                int64   `json:"id"`
-	IdFornecedor      int64   `json:"id_fornecedor"`
-	IdProduto         int64   `json:"id_produto"`
-	DataFornecimento  string  `json:"data_fornecimento"`
-	Validade          string  `json:"validade"`
-	PrecoUnitario     float32 `json:"preco_unitario"`
-	Estragados        int64   `json:"estragados"`
-	QuantidadeInicial int64   `json:"quantidade_inicial"`
+	Id                int64      `json:"id_lote"`
+	IdFornecedor      int64      `json:"id_fornecedor"`
+	IdProduto         int64      `json:"id_produto"`
+	DataFornecimento  time.Time  `json:"data_fornecimento"`
+	Validade          *time.Time `json:"validade"`
+	PrecoUnitario     float64    `json:"preco_unitario"`
+	Estragados        *int       `json:"estragados"`
+	QuantidadeInicial *int       `json:"quantidade_inicial"`
 }
 
 type LoteCreate struct {
-	IdFornecedor      int64   `json:"id_fornecedor"`
-	IdProduto         int64   `json:"id_produto"`
-	DataFornecimento  string  `json:"data_fornecimento"`
-	Validade          string  `json:"validade"`
-	PrecoUnitario     float32 `json:"preco_unitario"`
-	Estragados        int64   `json:"estragados"`
-	QuantidadeInicial int64   `json:"quantidade_inicial"`
+	IdFornecedor      int64      `json:"id_fornecedor"`
+	IdProduto         int64      `json:"id_produto"`
+	DataFornecimento  time.Time  `json:"data_fornecimento"`
+	Validade          *time.Time `json:"validade"`
+	PrecoUnitario     float64    `json:"preco_unitario"`
+	Estragados        *int       `json:"estragados"`
+	QuantidadeInicial *int       `json:"quantidade_inicial"`
 }
 
 func (lc LoteCreate) ToLote() Lote {

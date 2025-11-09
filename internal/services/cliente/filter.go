@@ -16,15 +16,19 @@ func NewClienteFilter(params url.Values) (util.Filter, error) {
 		return filter, err
 	}
 
-	attrs := []string{"nome", "cpf", "data_nascimento"}
+	attrs := []string{"nome", "cpf"}
 	if err := filter.GetSorts(params, attrs); err != nil {
 		return filter, err
 	}
 
-	for _, attr := range attrs {
-		if err := filter.GetFilterStr(params, attr); err != nil {
-			return filter, err
-		}
+	// Filtro de string (like, ilike, eq, ne)
+	if err := filter.GetFilterStr(params, "nome"); err != nil {
+		return filter, err
 	}
+	// Filtro de string (like, ilike, eq, ne)
+	if err := filter.GetFilterStr(params, "cpf"); err != nil {
+		return filter, err
+	}
+
 	return filter, nil
 }

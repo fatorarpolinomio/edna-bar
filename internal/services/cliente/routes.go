@@ -3,6 +3,7 @@ package cliente
 import (
 	"context"
 	"edna/internal/model"
+	"edna/internal/types"
 	"edna/internal/util"
 	"encoding/json"
 	"net/http"
@@ -119,11 +120,11 @@ func (h *Handler) fetch(w http.ResponseWriter, r *http.Request) {
 
 	cliente, err := h.store.GetByID(ctx, id)
 	if err != nil {
+		if err == types.ErrNotFound {
+			util.ErrorJSON(w, "Cliente not found.", http.StatusNotFound)
+			return
+		}
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if cliente == nil {
-		util.ErrorJSON(w, "Cliente not found.", http.StatusNotFound)
 		return
 	}
 
@@ -164,6 +165,10 @@ func (h *Handler) update(w http.ResponseWriter, r *http.Request) {
 	model.Id = id
 	err = h.store.Update(ctx, &model)
 	if err != nil {
+		if err == types.ErrNotFound {
+			util.ErrorJSON(w, "Cliente not found.", http.StatusNotFound)
+			return
+		}
 		util.ErrorJSON(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
@@ -191,6 +196,10 @@ func (h *Handler) delete(w http.ResponseWriter, r *http.Request) {
 
 	model, err := h.store.Delete(ctx, id)
 	if err != nil {
+		if err == types.ErrNotFound {
+			util.ErrorJSON(w, "Cliente not found.", http.StatusNotFound)
+			return
+		}
 		util.ErrorJSON(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}

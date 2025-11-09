@@ -3,6 +3,7 @@ package lote
 import (
 	"context"
 	"edna/internal/model"
+	"edna/internal/types"
 	"edna/internal/util"
 	"encoding/json"
 	"net/http"
@@ -32,7 +33,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /lotes/{id}", h.delete)
 }
 
-// @Summary List Lotees
+// @Summary List Lotes
 // @Tags Lote
 // @Produce json
 // @Param filter-nome query string false "Filter by nome using operators: like, ilike, eq, ne. Format: operator.value (e.g. like.João)"
@@ -117,17 +118,17 @@ func (h *Handler) fetch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fornecedor, err := h.store.GetByID(ctx, id)
+	cliente, err := h.store.GetByID(ctx, id)
 	if err != nil {
+		if err == types.ErrNotFound {
+			util.ErrorJSON(w, "Lote not found.", http.StatusNotFound)
+			return
+		}
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if fornecedor == nil {
-		util.ErrorJSON(w, "Lote not found.", http.StatusNotFound)
-		return
-	}
 
-	if err = util.WriteJSON(w, http.StatusOK, fornecedor); err != nil {
+	if err = util.WriteJSON(w, http.StatusOK, cliente); err != nil {
 		util.ErrorJSON(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -164,6 +165,10 @@ func (h *Handler) update(w http.ResponseWriter, r *http.Request) {
 	model.Id = id
 	err = h.store.Update(ctx, &model)
 	if err != nil {
+		if err == types.ErrNotFound {
+			util.ErrorJSON(w, "Lote not found.", http.StatusNotFound)
+			return
+		}
 		util.ErrorJSON(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
@@ -191,6 +196,10 @@ func (h *Handler) delete(w http.ResponseWriter, r *http.Request) {
 
 	model, err := h.store.Delete(ctx, id)
 	if err != nil {
+		if err == types.ErrNotFound {
+			util.ErrorJSON(w, "Lote not found.", http.StatusNotFound)
+			return
+		}
 		util.ErrorJSON(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}

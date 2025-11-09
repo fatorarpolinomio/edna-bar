@@ -16,52 +16,56 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db}
 }
 
-func (s *Store) GetAll(ctx context.Context, filter util.Filter) ([]model.Cliente, error) {
-	query := "SELECT id_cliente, nome, CPF, data_nascimento  FROM Cliente AS c"
-
-	rows, err := util.QueryRowsWithFilter(s.db, ctx, query, &filter, "f")
+func (s *Store) GetAll(ctx context.Context, filter util.Filter) ([]model.Lote, error) {
+	query := "SELECT id_lote, id_fornecedor, id_produto, data_fornecimento, validade, preco_unitario, estragados, quantidade_inicial FROM Lote AS l"
+	rows, err := util.QueryRowsWithFilter(s.db, ctx, query, &filter, "l")
 	if err != nil {
 		return nil, err
 	}
 
-	clientes := make([]model.Cliente, 0)
+	lotes := make([]model.Lote, 0)
 	for rows.Next() {
-		var cliente model.Cliente
-		err = rows.Scan(&cliente.Id, &cliente.Nome, &cliente.CPF)
+		var l model.Lote
+		err = rows.Scan(&l.Id, &l.IdFornecedor, &l.IdProduto, &l.DataFornecimento, &l.Validade, &l.PrecoUnitario, &l.Estragados, &l.QuantidadeInicial)
 		if err != nil {
 			return nil, err
 		}
-		clientes = append(clientes, cliente)
+		lotes = append(lotes, l)
 	}
-
-	return clientes, nil
+	return lotes, nil
 }
 
-func (s *Store) Create(ctx context.Context, props *model.Cliente) error {
-	query := "INSERT INTO Cliente (nome, CPF, data_nascimento) VALUES ($1, $2, $3) RETURNING id_cliente;"
+func (s *Store) GetByID(ctx context.Context, id int64) (*model.Lote, error) {
+	query := "SELECT id_lote, id_fornecedor, id_produto, data_fornecimento, validade, preco_unitario, estragados, quantidade_inicial FROM Lote WHERE id_lote = $1;"
+	row := s.db.QueryRowContext(ctx, query, id)
 
-	res := s.db.QueryRowContext(ctx, query, props.Nome, props.CPF, props.Nascimento)
+	var l model.Lote
+	err := row.Scan(&l.Id, &l.IdFornecedor, &l.IdProduto, &l.DataFornecimento, &l.Validade, &l.PrecoUnitario, &l.Estragados, &l.QuantidadeInicial)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, types.ErrNotFound
+		}
+		return nil, err
+	}
+	return &l, nil
+}
+
+func (s *Store) Create(ctx context.Context, props *model.Lote) error {
+	query := `
+		INSERT INTO Lote (id_fornecedor, id_produto, data_fornecimento, validade, preco_unitario, estragados, quantidade_inicial) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7) 
+		RETURNING id_lote;`
+	res := s.db.QueryRowContext(ctx, query, props.IdFornecedor, props.IdProduto, props.DataFornecimento, props.Validade, props.PrecoUnitario, props.Estragados, props.QuantidadeInicial)
 	return res.Scan(&props.Id)
 }
 
-func (s *Store) GetByID(ctx context.Context, id int64) (*model.Cliente, error) {
-	query := "SELECT id_cliente, nome, CPF, data_nascimento FROM Cliente WHERE id_cliente = $1;"
-
-	row := s.db.QueryRowContext(ctx, query, id)
-
-	var cliente model.Cliente
-	err := row.Scan(&cliente.Id, &cliente.Nome, &cliente.CPF)
-	if err != nil {
-		return nil, err
-	}
-
-	return &cliente, nil
-}
-
-func (s *Store) Update(ctx context.Context, props *model.Cliente) error {
-	query := "UPDATE Cliente SET nome = $1, CPF = $2, data_nascimento = $3 WHERE id_cliente = $3;"
-
-	res, err := s.db.ExecContext(ctx, query, props.Nome, props.CPF, props.Id, props.Nascimento)
+func (s *Store) Update(ctx context.Context, props *model.Lote) error {
+	query := `
+		UPDATE Lote SET 
+		id_fornecedor = $1, id_produto = $2, data_fornecimento = $3, validade = $4, 
+		preco_unitario = $5, estragados = $6, quantidade_inicial = $7
+		WHERE id_lote = $8;`
+	res, err := s.db.ExecContext(ctx, query, props.IdFornecedor, props.IdProduto, props.DataFornecimento, props.Validade, props.PrecoUnitario, props.Estragados, props.QuantidadeInicial, props.Id)
 	if err != nil {
 		return err
 	}
@@ -75,14 +79,16 @@ func (s *Store) Update(ctx context.Context, props *model.Cliente) error {
 	return nil
 }
 
-func (s *Store) Delete(ctx context.Context, id int64) (*model.Cliente, error) {
-	query := "DELETE FROM Cliente WHERE id_cliente = $1 RETURNING id_cliente, nome, CPF, data_nascimento;"
-
-	var model model.Cliente
+func (s *Store) Delete(ctx context.Context, id int64) (*model.Lote, error) {
+	query := "DELETE FROM Lote WHERE id_lote = $1 RETURNING id_lote, id_fornecedor, id_produto, data_fornecimento, validade, preco_unitario, estragados, quantidade_inicial;"
+	var l model.Lote
 	row := s.db.QueryRowContext(ctx, query, id)
-	err := row.Scan(&model.Id, &model.Nome, &model.CPF)
+	err := row.Scan(&l.Id, &l.IdFornecedor, &l.IdProduto, &l.DataFornecimento, &l.Validade, &l.PrecoUnitario, &l.Estragados, &l.QuantidadeInicial)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, types.ErrNotFound
+		}
 		return nil, err
 	}
-	return &model, nil
+	return &l, nil
 }

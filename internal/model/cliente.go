@@ -1,22 +1,26 @@
 package model
 
+import (
+	"time"
+)
+
 type Cliente struct {
-	Id         int64  `json:"id"`
-	CPF        string `json:"cpf"`
-	Nascimento string `json:"data_nascimento"`
-	Nome       string `json:"nome"`
+	Id             int64      `json:"id"`
+	Nome           string     `json:"nome"`
+	CPF            *string    `json:"cpf"`
+	DataNascimento *time.Time `json:"data_nascimento"`
 }
 
 type ClienteCreate struct {
-	Nome       string `json:"nome"`
-	Nascimento string `json:"data_nascimento"`
-	CPF        string `json:"cnpj"`
+	Nome           string     `json:"nome"`
+	CPF            *string    `json:"cpf"`
+	DataNascimento *time.Time `json:"data_nascimento"` // Espera-se "YYYY-MM-DD" ou formato RFC3339
 }
 
 func (cc ClienteCreate) ToCliente() Cliente {
 	return Cliente{
-		Nome:       cc.Nome,
-		Nascimento: cc.Nascimento,
-		CPF:        cc.CPF,
+		Nome:           cc.Nome,
+		CPF:            cc.CPF,
+		DataNascimento: cc.DataNascimento,
 	}
 }
