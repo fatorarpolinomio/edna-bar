@@ -11,3 +11,6 @@ CREATE TABLE IF NOT EXISTS Produto (
 CREATE TABLE IF NOT EXISTS ProdutoComercial (
     preco_venda decimal(6, 2) CHECK (preco_venda > 0) NOT NULL
 ) INHERITS (Produto);
+
+ALTER TABLE ProdutoComercial
+ADD PRIMARY KEY (id_produto);
