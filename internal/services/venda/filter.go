@@ -21,8 +21,18 @@ func NewVendaFilter(params url.Values) (util.Filter, error) {
 		return filter, err
 	}
 
-	for _, attr := range attrs {
-		if err := filter.GetFilterStr(params, attr); err != nil {
+	if err := filter.GetFilterStr(params, "tipo_pagamento"); err != nil {
+		return filter, err
+	}
+
+	for _, attr := range []string{"id_cliente", "id_funcionario"} {
+		if err := filter.GetFilterInt(params, attr); err != nil {
+			return filter, err
+		}
+	}
+
+	for _, attr := range []string{"data_hora_venda", "data_hora_pagamento"} {
+		if err := filter.GetFilterTime(params, attr); err != nil {
 			return filter, err
 		}
 	}

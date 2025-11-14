@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type FilterMap map[string]FilterItem
@@ -124,6 +125,30 @@ func (ff *Filter) GetFilterFloat(params url.Values, key string) error {
 		}
 
 		v, err := strconv.ParseFloat(parts[1], 64)
+		if err != nil {
+			return err
+		}
+		ff.Filters[key] = FilterItem{
+			Operator: parts[0],
+			Value:    v,
+		}
+	}
+	return nil
+}
+
+func (ff *Filter) GetFilterTime(params url.Values, key string) error {
+	filterKey := fmt.Sprintf("filter-%s", key)
+
+	if params.Get(filterKey) != "" {
+		parts := strings.Split(params.Get(filterKey), ".")
+		if len(parts) != 2 {
+			return errors.New(fmt.Sprintf("Invalid query param `%s`", filterKey))
+		}
+		if !IsOperatorForNumber(parts[0]) {
+			return errors.New(fmt.Sprintf("Invalid operator for query `%s`", filterKey))
+		}
+
+		v, err := time.Parse("2025-01-01 00:00:00", parts[1])
 		if err != nil {
 			return err
 		}

@@ -505,6 +505,243 @@
                 }
             }
         },
+        "/funcionarios": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Funcionario"
+                ],
+                "summary": "List Funcionarios",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by nome using operators: like, ilike, eq, ne. Format: operator.value (e.g. like.João)",
+                        "name": "filter-nome",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by CPF using operators: eq, ne, like, ilike. Format: operator.value (e.g. eq.123456789)",
+                        "name": "filter-CPF",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort fields: nome, CPF. Prefix with '-' for desc. Comma separated for multiple fields (e.g. -nome,CPF)",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination offset (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination limit (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Funcionario"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Funcionario"
+                ],
+                "summary": "Create Funcionario",
+                "parameters": [
+                    {
+                        "description": "Funcionario payload",
+                        "name": "funcionario",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.FuncionarioCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Funcionario"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/funcionarios/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Funcionario"
+                ],
+                "summary": "Get Funcionario by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Funcionario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Funcionario"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Funcionario"
+                ],
+                "summary": "Update Funcionario",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Funcionario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Funcionario payload",
+                        "name": "funcionario",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.FuncionarioCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Funcionario"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Funcionario"
+                ],
+                "summary": "Delete Funcionario",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Funcionario ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Funcionario"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Returns the health status of the application and dependencies.",
@@ -1519,6 +1756,255 @@
                     }
                 }
             }
+        },
+        "/vendas": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Venda"
+                ],
+                "summary": "List Vendas",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Filter by idCliente using operators: eq, ne, gt, lt",
+                        "name": "filter-idCliente",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by idFuncionario using operators: eq, ne, gt, lt",
+                        "name": "filter-idFuncionario",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by tipoPagamento using operators: eq, ne, like, ilike",
+                        "name": "filter-tipoPagamento",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by dataHoraVenda using operators: eq, ne, gt, lt",
+                        "name": "filter-dataHoraVenda",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort fields: dataHoraVenda, dataHoraPagamento, tipoPagamento. Prefix with '-' for desc.",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination offset (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination limit (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Venda"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Venda"
+                ],
+                "summary": "Create Venda",
+                "parameters": [
+                    {
+                        "description": "Venda payload",
+                        "name": "venda",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.VendaCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Venda"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/vendas/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Venda"
+                ],
+                "summary": "Get Venda by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Venda ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Venda"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Venda"
+                ],
+                "summary": "Update Venda",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Venda ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Venda payload",
+                        "name": "venda",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.VendaCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Venda"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Venda"
+                ],
+                "summary": "Delete Venda",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Venda ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Venda"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1612,6 +2098,55 @@
                     "type": "string"
                 },
                 "nome": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Funcionario": {
+            "type": "object",
+            "properties": {
+                "CPF": {
+                    "type": "string"
+                },
+                "data_contratacao": {
+                    "type": "string"
+                },
+                "expediente": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "nome": {
+                    "type": "string"
+                },
+                "salario": {
+                    "type": "number"
+                },
+                "tipo": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.FuncionarioCreate": {
+            "type": "object",
+            "properties": {
+                "CPF": {
+                    "type": "string"
+                },
+                "data_contratacao": {
+                    "type": "string"
+                },
+                "expediente": {
+                    "type": "string"
+                },
+                "nome": {
+                    "type": "string"
+                },
+                "salario": {
+                    "type": "number"
+                },
+                "tipo": {
                     "type": "string"
                 }
             }
@@ -1765,6 +2300,49 @@
                 },
                 "preco_venda": {
                     "type": "number"
+                }
+            }
+        },
+        "model.Venda": {
+            "type": "object",
+            "properties": {
+                "data_hora_pagamento": {
+                    "type": "string"
+                },
+                "data_hora_renda": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "id_cliente": {
+                    "type": "integer"
+                },
+                "id_funcionario": {
+                    "type": "integer"
+                },
+                "tipo_pagamento": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.VendaCreate": {
+            "type": "object",
+            "properties": {
+                "data_hora_pagamento": {
+                    "type": "string"
+                },
+                "data_hora_renda": {
+                    "type": "string"
+                },
+                "id_cliente": {
+                    "type": "integer"
+                },
+                "id_funcionario": {
+                    "type": "integer"
+                },
+                "tipo_pagamento": {
+                    "type": "string"
                 }
             }
         },

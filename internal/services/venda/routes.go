@@ -35,6 +35,8 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 // @Summary List Vendas
 // @Tags Venda
 // @Produce json
+// @Param filter-idCliente query int false "Filter by idCliente using operators: eq, ne, gt, lt"
+// @Param filter-idFuncionario query int false "Filter by idFuncionario using operators: eq, ne, gt, lt"
 // @Param filter-tipoPagamento query string false "Filter by tipoPagamento using operators: eq, ne, like, ilike"
 // @Param filter-dataHoraVenda query string false "Filter by dataHoraVenda using operators: eq, ne, gt, lt"
 // @Param sort query string false "Sort fields: dataHoraVenda, dataHoraPagamento, tipoPagamento. Prefix with '-' for desc."

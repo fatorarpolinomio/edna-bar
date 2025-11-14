@@ -61,6 +61,38 @@ definitions:
       nome:
         type: string
     type: object
+  model.Funcionario:
+    properties:
+      CPF:
+        type: string
+      data_contratacao:
+        type: string
+      expediente:
+        type: string
+      id:
+        type: integer
+      nome:
+        type: string
+      salario:
+        type: number
+      tipo:
+        type: string
+    type: object
+  model.FuncionarioCreate:
+    properties:
+      CPF:
+        type: string
+      data_contratacao:
+        type: string
+      expediente:
+        type: string
+      nome:
+        type: string
+      salario:
+        type: number
+      tipo:
+        type: string
+    type: object
   model.Lote:
     properties:
       data_fornecimento:
@@ -159,6 +191,34 @@ definitions:
         type: string
       preco_venda:
         type: number
+    type: object
+  model.Venda:
+    properties:
+      data_hora_pagamento:
+        type: string
+      data_hora_renda:
+        type: string
+      id:
+        type: integer
+      id_cliente:
+        type: integer
+      id_funcionario:
+        type: integer
+      tipo_pagamento:
+        type: string
+    type: object
+  model.VendaCreate:
+    properties:
+      data_hora_pagamento:
+        type: string
+      data_hora_renda:
+        type: string
+      id_cliente:
+        type: integer
+      id_funcionario:
+        type: integer
+      tipo_pagamento:
+        type: string
     type: object
   types.ErrorResponse:
     properties:
@@ -502,6 +562,164 @@ paths:
       summary: Update Fornecedor
       tags:
       - Fornecedor
+  /funcionarios:
+    get:
+      parameters:
+      - description: 'Filter by nome using operators: like, ilike, eq, ne. Format:
+          operator.value (e.g. like.João)'
+        in: query
+        name: filter-nome
+        type: string
+      - description: 'Filter by CPF using operators: eq, ne, like, ilike. Format:
+          operator.value (e.g. eq.123456789)'
+        in: query
+        name: filter-CPF
+        type: string
+      - description: 'Sort fields: nome, CPF. Prefix with ''-'' for desc. Comma separated
+          for multiple fields (e.g. -nome,CPF)'
+        in: query
+        name: sort
+        type: string
+      - description: Pagination offset (default 0)
+        in: query
+        name: offset
+        type: integer
+      - description: Pagination limit (default 10)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Funcionario'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List Funcionarios
+      tags:
+      - Funcionario
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Funcionario payload
+        in: body
+        name: funcionario
+        required: true
+        schema:
+          $ref: '#/definitions/model.FuncionarioCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Funcionario'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create Funcionario
+      tags:
+      - Funcionario
+  /funcionarios/{id}:
+    delete:
+      parameters:
+      - description: Funcionario ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Funcionario'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete Funcionario
+      tags:
+      - Funcionario
+    get:
+      parameters:
+      - description: Funcionario ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Funcionario'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get Funcionario by ID
+      tags:
+      - Funcionario
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Funcionario ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Funcionario payload
+        in: body
+        name: funcionario
+        required: true
+        schema:
+          $ref: '#/definitions/model.FuncionarioCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Funcionario'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update Funcionario
+      tags:
+      - Funcionario
   /health:
     get:
       description: Returns the health status of the application and dependencies.
@@ -1185,4 +1403,168 @@ paths:
       summary: List Estrutural products
       tags:
       - Produtos
+  /vendas:
+    get:
+      parameters:
+      - description: 'Filter by idCliente using operators: eq, ne, gt, lt'
+        in: query
+        name: filter-idCliente
+        type: integer
+      - description: 'Filter by idFuncionario using operators: eq, ne, gt, lt'
+        in: query
+        name: filter-idFuncionario
+        type: integer
+      - description: 'Filter by tipoPagamento using operators: eq, ne, like, ilike'
+        in: query
+        name: filter-tipoPagamento
+        type: string
+      - description: 'Filter by dataHoraVenda using operators: eq, ne, gt, lt'
+        in: query
+        name: filter-dataHoraVenda
+        type: string
+      - description: 'Sort fields: dataHoraVenda, dataHoraPagamento, tipoPagamento.
+          Prefix with ''-'' for desc.'
+        in: query
+        name: sort
+        type: string
+      - description: Pagination offset (default 0)
+        in: query
+        name: offset
+        type: integer
+      - description: Pagination limit (default 10)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Venda'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List Vendas
+      tags:
+      - Venda
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Venda payload
+        in: body
+        name: venda
+        required: true
+        schema:
+          $ref: '#/definitions/model.VendaCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Venda'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create Venda
+      tags:
+      - Venda
+  /vendas/{id}:
+    delete:
+      parameters:
+      - description: Venda ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Venda'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete Venda
+      tags:
+      - Venda
+    get:
+      parameters:
+      - description: Venda ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Venda'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get Venda by ID
+      tags:
+      - Venda
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Venda ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Venda payload
+        in: body
+        name: venda
+        required: true
+        schema:
+          $ref: '#/definitions/model.VendaCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Venda'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update Venda
+      tags:
+      - Venda
 swagger: "2.0"

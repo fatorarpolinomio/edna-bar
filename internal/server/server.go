@@ -15,6 +15,8 @@ import (
 	"edna/internal/services/lote"
 	"edna/internal/services/oferta"
 	"edna/internal/services/produto"
+	"edna/internal/services/venda"
+	"edna/internal/services/funcionario"
 )
 
 type Server struct {
@@ -26,6 +28,8 @@ type Server struct {
 	clienteStore    *cliente.Store
 	loteStore       *lote.Store
 	ofertaStore     *oferta.Store
+	vendaStore      *venda.Store
+	funcionarioStore *funcionario.Store
 }
 
 func NewServer() *http.Server {
@@ -40,6 +44,8 @@ func NewServer() *http.Server {
 		clienteStore:    cliente.NewStore(db.Conn()),
 		loteStore:       lote.NewStore(db.Conn()),
 		ofertaStore:     oferta.NewStore(db.Conn()),
+		vendaStore:      venda.NewStore(db.Conn()),
+		funcionarioStore: funcionario.NewStore(db.Conn()),
 	}
 
 	// Declare Server config

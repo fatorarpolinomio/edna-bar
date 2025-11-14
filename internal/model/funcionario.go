@@ -6,7 +6,7 @@ type Funcionario struct {
 	CPF             string  `json:"CPF"`
 	Tipo            string  `json:"tipo"`
 	Expediente      string  `json:"expediente"`
-	Salario         float64 `json:"salario`
+	Salario         float64 `json:"salario"`
 	DataContratacao string  `json:"data_contratacao"`
 }
 
@@ -15,7 +15,7 @@ type FuncionarioCreate struct {
 	CPF             string  `json:"CPF"`
 	Tipo            string  `json:"tipo"`
 	Expediente      string  `json:"expediente"`
-	Salario         float64 `json:"salario`
+	Salario         float64 `json:"salario"`
 	DataContratacao string  `json:"data_contratacao"`
 }
 
