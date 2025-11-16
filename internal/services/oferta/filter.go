@@ -14,7 +14,7 @@ func NewOfertaFilter(params url.Values) (util.Filter, error) {
 		return filter, err
 	}
 
-	attrs := []string{"nome", "valor_fixo", "percentual_desconto"}
+	attrs := []string{"nome", "valor_fixo", "percentual_desconto", "data_criacao"}
 	if err := filter.GetSorts(params, attrs); err != nil {
 		return filter, err
 	}
@@ -26,6 +26,10 @@ func NewOfertaFilter(params url.Values) (util.Filter, error) {
 		return filter, err
 	}
 	if err := filter.GetFilterInt(params, "percentual_desconto"); err != nil {
+		return filter, err
+	}
+
+	if err := filter.GetFilterTime(params, "data_criacao"); err != nil {
 		return filter, err
 	}
 
