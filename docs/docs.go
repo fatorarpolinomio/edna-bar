@@ -141,6 +141,73 @@ const docTemplate = `{
                 }
             }
         },
+        "/clientes/saldos": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cliente"
+                ],
+                "summary": "List Clients",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by nome using operators: like, ilike, eq, ne. Format: operator.value (e.g. like.João)",
+                        "name": "filter-nome",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by cnpj using operators: eq, ne, like, ilike. Format: operator.value (e.g. eq.123456789)",
+                        "name": "filter-cnpj",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "format": "float32",
+                        "description": "Filter by saldo_devedor using operators: eq, ne, gt, lt, gte, lte. Format: operator.value (e.g. eq.100)",
+                        "name": "filter-saldo_devedor",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort fields: nome, cnpj, saldo_devedor. Prefix with '-' for desc. Comma separated for multiple fields (e.g. -nome,cnpj)",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination offset (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination limit (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.ClienteWithSaldo"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/clientes/{id}": {
             "get": {
                 "produces": [
@@ -279,6 +346,9 @@ const docTemplate = `{
             "get": {
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Cliente"
                 ],
                 "summary": "Fetch Client's Balance",
                 "parameters": [
@@ -902,6 +972,40 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/model.Lote"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/lotes/relatorio": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lote"
+                ],
+                "summary": "Get Relatorio of Lotes spends",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/services_lote.GastoMensal"
+                            }
                         }
                     },
                     "400": {
@@ -1841,6 +1945,127 @@ const docTemplate = `{
                 }
             }
         },
+        "/relatorios/financeiro": {
+            "get": {
+                "description": "Retrieve a financial report within a specified date range.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Relatórios"
+                ],
+                "summary": "Get Financial Report",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "name": "start",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (YYYY-MM-DD)",
+                        "name": "end",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "day",
+                        "description": "Time granularity (day|week|month)",
+                        "name": "granularity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of periods to project",
+                        "name": "projection_days",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.RelatorioFinanceiro"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/relatorios/folha-pagamento": {
+            "get": {
+                "description": "Retrieve monthly payroll reports for a specified period. Generates individual payroll for each month within the date range.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Relatórios"
+                ],
+                "summary": "Get Payroll Report",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period start date (YYYY-MM-DD)",
+                        "name": "start",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Period end date (YYYY-MM-DD)",
+                        "name": "end",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Employee type filter (garcom|seguranca|caixa|faxineiro|balconista)",
+                        "name": "tipo",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.RelatorioFolhaPagamento"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/vendas": {
             "get": {
                 "produces": [
@@ -2181,6 +2406,35 @@ const docTemplate = `{
                 }
             }
         },
+        "model.FolhaPagamentoMensal": {
+            "type": "object",
+            "properties": {
+                "ano": {
+                    "type": "integer"
+                },
+                "funcionarios": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.FuncionarioFolhaPagamento"
+                    }
+                },
+                "mes": {
+                    "type": "string"
+                },
+                "total_bonificacoes": {
+                    "type": "number"
+                },
+                "total_folha": {
+                    "type": "number"
+                },
+                "total_funcionarios": {
+                    "type": "integer"
+                },
+                "total_salario_base": {
+                    "type": "number"
+                }
+            }
+        },
         "model.Fornecedor": {
             "type": "object",
             "properties": {
@@ -2248,6 +2502,38 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "salario": {
+                    "type": "number"
+                },
+                "tipo": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.FuncionarioFolhaPagamento": {
+            "type": "object",
+            "properties": {
+                "bonificacao": {
+                    "type": "number"
+                },
+                "cpf": {
+                    "type": "string"
+                },
+                "data_contratacao": {
+                    "type": "string"
+                },
+                "expediente": {
+                    "type": "string"
+                },
+                "id_funcionario": {
+                    "type": "integer"
+                },
+                "nome": {
+                    "type": "string"
+                },
+                "salario_base": {
+                    "type": "number"
+                },
+                "salario_total": {
                     "type": "number"
                 },
                 "tipo": {
@@ -2407,6 +2693,89 @@ const docTemplate = `{
                 }
             }
         },
+        "model.RelatorioFinanceiro": {
+            "type": "object",
+            "properties": {
+                "granularity": {
+                    "type": "string"
+                },
+                "period_end": {
+                    "type": "string"
+                },
+                "period_start": {
+                    "type": "string"
+                },
+                "projection": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.SeriePonto"
+                    }
+                },
+                "series": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.SeriePonto"
+                    }
+                },
+                "totals": {
+                    "type": "object",
+                    "properties": {
+                        "despesa": {
+                            "type": "number"
+                        },
+                        "lucro": {
+                            "type": "number"
+                        },
+                        "receita": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "model.RelatorioFolhaPagamento": {
+            "type": "object",
+            "properties": {
+                "folhas_por_mes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.FolhaPagamentoMensal"
+                    }
+                },
+                "period_end": {
+                    "type": "string"
+                },
+                "period_start": {
+                    "type": "string"
+                },
+                "tipo_filtro": {
+                    "type": "string"
+                },
+                "total_geral_folha": {
+                    "type": "number"
+                },
+                "total_periodos": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.SeriePonto": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "despesa": {
+                    "type": "number"
+                },
+                "lucro": {
+                    "type": "number"
+                },
+                "receita": {
+                    "type": "number"
+                }
+            }
+        },
         "model.UnionProduto": {
             "type": "object",
             "properties": {
@@ -2467,6 +2836,20 @@ const docTemplate = `{
                 },
                 "tipo_pagamento": {
                     "type": "string"
+                }
+            }
+        },
+        "services_lote.GastoMensal": {
+            "type": "object",
+            "properties": {
+                "lotes_comprados": {
+                    "type": "integer"
+                },
+                "mes": {
+                    "type": "integer"
+                },
+                "total_gasto": {
+                    "type": "number"
                 }
             }
         },

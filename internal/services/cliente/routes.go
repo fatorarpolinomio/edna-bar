@@ -214,7 +214,7 @@ func (h *Handler) update(w http.ResponseWriter, r *http.Request) {
 
 
 // @Summary Fetch Client's Balance
-// // @Tags Cliente
+// @Tags Cliente
 // @Produce json
 // @Param id path int true "Cliente ID"
 // @Success 200 {object} model.ClienteWithSaldo

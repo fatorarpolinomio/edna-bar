@@ -3,11 +3,12 @@ package server
 import (
 	"edna/internal/services/cliente"
 	"edna/internal/services/fornecedor"
+	"edna/internal/services/funcionario"
 	"edna/internal/services/lote"
 	"edna/internal/services/oferta"
 	"edna/internal/services/produto"
+	"edna/internal/services/relatorio"
 	"edna/internal/services/venda"
-	"edna/internal/services/funcionario"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -28,6 +29,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	loteHandler := lote.NewHandler(s.loteStore)
 	ofertaHandler := oferta.NewHandler(s.ofertaStore)
 	vendaHandler := venda.NewHandler(s.vendaStore)
+	relatorioHandler := relatorio.NewHandler(s.relatorioStore)
 	funcionarioHandler := funcionario.NewHandler(s.funcionarioStore)
 
 	mux.HandleFunc("/health", s.healthHandler)
@@ -37,6 +39,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	loteHandler.RegisterRoutes(mux)
 	ofertaHandler.RegisterRoutes(mux)
 	vendaHandler.RegisterRoutes(mux)
+	relatorioHandler.RegisterRoutes(mux)
 	funcionarioHandler.RegisterRoutes(mux)
 
 	// Register routes

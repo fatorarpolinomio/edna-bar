@@ -52,8 +52,8 @@ func (s *Store) GetByID(ctx context.Context, id int64) (*model.Lote, error) {
 
 func (s *Store) Create(ctx context.Context, props *model.Lote) error {
 	query := `
-		INSERT INTO Lote (id_fornecedor, id_produto, data_fornecimento, validade, preco_unitario, estragados, quantidade_inicial) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7) 
+		INSERT INTO Lote (id_fornecedor, id_produto, data_fornecimento, validade, preco_unitario, estragados, quantidade_inicial)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id_lote;`
 	res := s.db.QueryRowContext(ctx, query, props.IdFornecedor, props.IdProduto, props.DataFornecimento, props.Validade, props.PrecoUnitario, props.Estragados, props.QuantidadeInicial)
 	return res.Scan(&props.Id)
@@ -61,8 +61,8 @@ func (s *Store) Create(ctx context.Context, props *model.Lote) error {
 
 func (s *Store) Update(ctx context.Context, props *model.Lote) error {
 	query := `
-		UPDATE Lote SET 
-		id_fornecedor = $1, id_produto = $2, data_fornecimento = $3, validade = $4, 
+		UPDATE Lote SET
+		id_fornecedor = $1, id_produto = $2, data_fornecimento = $3, validade = $4,
 		preco_unitario = $5, estragados = $6, quantidade_inicial = $7
 		WHERE id_lote = $8;`
 	res, err := s.db.ExecContext(ctx, query, props.IdFornecedor, props.IdProduto, props.DataFornecimento, props.Validade, props.PrecoUnitario, props.Estragados, props.QuantidadeInicial, props.Id)
@@ -91,4 +91,41 @@ func (s *Store) Delete(ctx context.Context, id int64) (*model.Lote, error) {
 		return nil, err
 	}
 	return &l, nil
+}
+
+func (s *Store) GetRelatorio(ctx context.Context) (map[uint]GastoMensal, error) {
+	query := `
+		SELECT
+			EXTRACT(YEAR FROM data_fornecimento)::int AS ano,
+			EXTRACT(MONTH FROM data_fornecimento)::int AS mes,
+			COALESCE(SUM(preco_unitario * quantidade_inicial), 0) AS total_gasto,
+			COUNT(*)::int AS quantidade
+		FROM Lote
+		GROUP BY ano, mes
+		ORDER BY ano, mes;`
+
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	gastos := make(map[uint]GastoMensal)
+	for rows.Next() {
+		var ano uint
+		var g GastoMensal
+
+		if err := rows.Scan(&ano, &g.Mes, &g.Total, &g.Quantidade); err != nil {
+			return nil, err
+		}
+
+		gastos[ano] = g
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Return an empty relatorio for now; populate its fields above as required by your relatorio type.
+	return gastos, nil
 }

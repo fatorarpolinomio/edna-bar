@@ -58,6 +58,25 @@ definitions:
       preco_venda:
         type: number
     type: object
+  model.FolhaPagamentoMensal:
+    properties:
+      ano:
+        type: integer
+      funcionarios:
+        items:
+          $ref: '#/definitions/model.FuncionarioFolhaPagamento'
+        type: array
+      mes:
+        type: string
+      total_bonificacoes:
+        type: number
+      total_folha:
+        type: number
+      total_funcionarios:
+        type: integer
+      total_salario_base:
+        type: number
+    type: object
   model.Fornecedor:
     properties:
       cnpj:
@@ -102,6 +121,27 @@ definitions:
       nome:
         type: string
       salario:
+        type: number
+      tipo:
+        type: string
+    type: object
+  model.FuncionarioFolhaPagamento:
+    properties:
+      bonificacao:
+        type: number
+      cpf:
+        type: string
+      data_contratacao:
+        type: string
+      expediente:
+        type: string
+      id_funcionario:
+        type: integer
+      nome:
+        type: string
+      salario_base:
+        type: number
+      salario_total:
         type: number
       tipo:
         type: string
@@ -205,6 +245,60 @@ definitions:
       quantidade_disponível:
         type: integer
     type: object
+  model.RelatorioFinanceiro:
+    properties:
+      granularity:
+        type: string
+      period_end:
+        type: string
+      period_start:
+        type: string
+      projection:
+        items:
+          $ref: '#/definitions/model.SeriePonto'
+        type: array
+      series:
+        items:
+          $ref: '#/definitions/model.SeriePonto'
+        type: array
+      totals:
+        properties:
+          despesa:
+            type: number
+          lucro:
+            type: number
+          receita:
+            type: number
+        type: object
+    type: object
+  model.RelatorioFolhaPagamento:
+    properties:
+      folhas_por_mes:
+        items:
+          $ref: '#/definitions/model.FolhaPagamentoMensal'
+        type: array
+      period_end:
+        type: string
+      period_start:
+        type: string
+      tipo_filtro:
+        type: string
+      total_geral_folha:
+        type: number
+      total_periodos:
+        type: integer
+    type: object
+  model.SeriePonto:
+    properties:
+      date:
+        type: string
+      despesa:
+        type: number
+      lucro:
+        type: number
+      receita:
+        type: number
+    type: object
   model.UnionProduto:
     properties:
       categoria:
@@ -245,6 +339,15 @@ definitions:
         type: integer
       tipo_pagamento:
         type: string
+    type: object
+  services_lote.GastoMensal:
+    properties:
+      lotes_comprados:
+        type: integer
+      mes:
+        type: integer
+      total_gasto:
+        type: number
     type: object
   types.ErrorResponse:
     properties:
@@ -454,6 +557,56 @@ paths:
           schema:
             $ref: '#/definitions/types.ErrorResponse'
       summary: Fetch Client's Balance
+      tags:
+      - Cliente
+  /clientes/saldos:
+    get:
+      parameters:
+      - description: 'Filter by nome using operators: like, ilike, eq, ne. Format:
+          operator.value (e.g. like.João)'
+        in: query
+        name: filter-nome
+        type: string
+      - description: 'Filter by cnpj using operators: eq, ne, like, ilike. Format:
+          operator.value (e.g. eq.123456789)'
+        in: query
+        name: filter-cnpj
+        type: string
+      - description: 'Filter by saldo_devedor using operators: eq, ne, gt, lt, gte,
+          lte. Format: operator.value (e.g. eq.100)'
+        format: float32
+        in: query
+        name: filter-saldo_devedor
+        type: number
+      - description: 'Sort fields: nome, cnpj, saldo_devedor. Prefix with ''-'' for
+          desc. Comma separated for multiple fields (e.g. -nome,cnpj)'
+        in: query
+        name: sort
+        type: string
+      - description: Pagination offset (default 0)
+        in: query
+        name: offset
+        type: integer
+      - description: Pagination limit (default 10)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ClienteWithSaldo'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List Clients
+      tags:
+      - Cliente
   /fornecedores:
     get:
       parameters:
@@ -946,6 +1099,28 @@ paths:
           schema:
             $ref: '#/definitions/types.ErrorResponse'
       summary: Update Lote
+      tags:
+      - Lote
+  /lotes/relatorio:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/services_lote.GastoMensal'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get Relatorio of Lotes spends
       tags:
       - Lote
   /ofertas:
@@ -1479,6 +1654,88 @@ paths:
       summary: List Estrutural products
       tags:
       - Produtos
+  /relatorios/financeiro:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a financial report within a specified date range.
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start
+        required: true
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end
+        required: true
+        type: string
+      - default: day
+        description: Time granularity (day|week|month)
+        in: query
+        name: granularity
+        type: string
+      - description: Number of periods to project
+        in: query
+        name: projection_days
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RelatorioFinanceiro'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get Financial Report
+      tags:
+      - Relatórios
+  /relatorios/folha-pagamento:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve monthly payroll reports for a specified period. Generates
+        individual payroll for each month within the date range.
+      parameters:
+      - description: Period start date (YYYY-MM-DD)
+        in: query
+        name: start
+        required: true
+        type: string
+      - description: Period end date (YYYY-MM-DD)
+        in: query
+        name: end
+        required: true
+        type: string
+      - description: Employee type filter (garcom|seguranca|caixa|faxineiro|balconista)
+        in: query
+        name: tipo
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RelatorioFolhaPagamento'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get Payroll Report
+      tags:
+      - Relatórios
   /vendas:
     get:
       parameters:

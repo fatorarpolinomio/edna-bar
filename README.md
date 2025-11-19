@@ -18,11 +18,6 @@ Sistema de banco de dados de Bar. Gerencie produtos, atendimentos e outras ativi
 10. Gerenciar (CRUD) a criação de regras de desconto e combos promocionais.
 11. Buscar e filtrar promoções por critérios como popularidade, lucratividade e data de criação.
 
-## Tasks
-- [ ] Implementar rotas e store de item_venda
-- [ ] Implementar aplica oferta
-- [x] Visualizar saldo devedor do cliente
-- [ ] Criar visualização de despesas (ver gastos e vendas) (financeiro/despesas)
 
 ## Tecnologias Utilizadas
 

@@ -43,7 +43,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /produtos/comercial/{id}", h.getComercialHandler)
 	mux.HandleFunc("PUT /produtos/comercial/{id}", h.updateComercialHandler)
 
-	mux.HandleFunc("GET /produtos/{id}/quantidade", h.getQuantidadeHandler)
+	mux.HandleFunc("GET /produtos/quantidade/{id}", h.getQuantidadeHandler)
 }
 
  // @Summary List Produtos (all types)
