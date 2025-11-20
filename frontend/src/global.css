@@ -1,0 +1,28 @@
+* {
+  padding: 0px;
+  border: 0px;
+  margin: 0px;
+  font-size: 2.5vh;
+}
+html {
+  background-color: #2D2230;
+}
+
+.db-table {
+    padding-top: 10vh;
+}
+
+table {
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+th {
+  background-color: #f4f4f4;
+}

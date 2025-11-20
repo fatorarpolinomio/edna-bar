@@ -1,5 +1,3 @@
--- migrations/000009_seed_initial_data.up.sql
-
 -- Insere Fornecedores
 INSERT INTO Fornecedor (CNPJ, nome) VALUES
 ('11223344000155', 'Distribuidora de Bebidas Central'),
