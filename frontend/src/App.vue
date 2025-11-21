@@ -45,12 +45,12 @@
   padding: 1vh 2vw;
 }
 .nav-links a {
-  color: #0d0d0d;
+  color: var(--edna-black);
   text-decoration: none;
   font-weight: 500;
 }
 .nav-links a:hover,
 .nav-links a.router-link-active {
-  color: #F5E8BA;
+  color: var(--edna-yellow);
 }
 </style>

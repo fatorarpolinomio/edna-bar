@@ -1,12 +1,31 @@
+/* PALETA DE CORES E.D.N.A. */
+:root {
+  --edna-blue: #B6E5F3;
+  --edna-green: #5AD3B0;
+  --edna-wine: #A12D4C;
+  --edna-red: #E71D51;
+  --edna-orange: #F4716E;
+  --edna-yellow: #FFD782;
+  --edna-light-gray: #888899;
+  --edna-gray: #353545;
+  --edna-dark-gray: #2A2A32;
+  --edna-black: #1A1A1E;
+  --edna-white: #F4F4FF;
+}
+
 * {
   padding: 0px;
   border: 0px;
   margin: 0px;
   font-size: 2.5vh;
-  color: #F5E8BA;
+  color: var(--edna-white);
+  font-family: "Nanum Myeongjo", serif;
+  font-weight: 400;
+  font-style: normal;
 }
+
 html {
-  background-color: #b6e5f3;
+  background-color: var(--edna-blue);
 }
 
 .nav-space {
@@ -19,11 +38,13 @@ table {
   margin-right: auto;
   border-collapse: collapse;
 }
+
 th, td {
-  border: 1px solid #ddd;
+  border: 1px solid var(--edna-white);
   padding: 8px;
   text-align: left;
 }
+
 th {
-  background-color: #f4f4f4;
+  background-color: var(--edna-white);
 }

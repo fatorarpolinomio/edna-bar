@@ -148,33 +148,25 @@ onMounted(() => {
             </button>
           </div>
         </header>
+        <div class="list-cards">
+          <div v-if="produtos.length === 0 && !carregando" class="empty-state">Nenhum produto.</div>
+          <div v-if="carregando" class="empty-state">Carregando...</div>
 
-        <div class="list-container">
-          <table class="dark-table">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Marca</th>
-                <th>Qtd.</th>
-                <th>Preço</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="produtos.length === 0">
-                <td colspan="5" class="empty-state">Nenhum produto cadastrado.</td>
-              </tr>
-              <tr v-for="prod in produtos" :key="prod.id">
-                <td>{{ prod.nome }}</td>
-                <td>{{ prod.marca }}</td>
-                <td :class="{'low-stock': prod.quantidade < 10}">{{ prod.quantidade }}</td>
-                <td>R$ {{ prod.preco_venda }}</td>
-                <td>
-                  <button @click="deletarItem('produto', prod.id)" class="btn-delete">🗑️</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div v-for="prod in produtos" :key="prod.id" class="card-item card-produto">
+            <div class="card-main">
+              <div class="card-top">
+                <h3>{{ prod.nome }}</h3>
+                <span class="marca-tag">{{ prod.marca || 'Genérico' }}</span>
+              </div>
+              <div class="card-details">
+                <span class="price">R$ {{ prod.preco_venda.toFixed(2) }}</span>
+                <span class="stock" :class="{'low-stock': prod.quantidade <= 5}">
+                  Estoque: {{ prod.quantidade }}
+                </span>
+              </div>
+            </div>
+            <button @click="deletarItem('produto', prod.id)" class="btn-icon-delete">×</button>
+          </div>
         </div>
       </section>
 
@@ -196,7 +188,7 @@ onMounted(() => {
                 <option value="fixo">R$ Fixo</option>
               </select>
               <input v-model="ofertaForm.valor" type="number" placeholder="Valor" />
-              <button @click="criarOferta" class="btn-save">Criar Oferta</button>
+              <button @click="criarOferta" class="btn-save">Criar</button>
             </div>
           </div>
         </header>
@@ -207,7 +199,7 @@ onMounted(() => {
           <div v-for="oferta in ofertas" :key="oferta.id_oferta" class="card-oferta">
             <div class="card-header">
               <h3>{{ oferta.nome }}</h3>
-              <button @click="deletarItem('oferta', oferta.id_oferta)" class="btn-close">×</button>
+              <button @click="deletarItem('oferta', oferta.id_oferta)" class="btn-icon-delete">×</button>
             </div>
             
             <div class="card-body">
@@ -236,14 +228,29 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* PALETA DE CORES E.D.N.A. */
+/* Para syntax highlight colorido :3 */
+:root {
+  --edna-blue: #B6E5F3;
+  --edna-green: #88CAAF;
+  --edna-wine: #A12D4C;
+  --edna-red: #E71D51;
+  --edna-orange: #F4716E;
+  --edna-yellow: #FFD782;
+  --edna-light-gray: #888899;
+  --edna-gray: #353548;
+  --edna-dark-gray: #2A2A32;
+  --edna-black: #1A1A1E;
+  --edna-white: #F4F4FF;
+}
 /* --- VARIÁVEIS GERAIS --- */
 .nav-space {
-  background-image: linear-gradient(215deg, #6c5de3, #4b20a8);
+  background-image: linear-gradient(220deg, var(--edna-orange), var(--edna-yellow));
 }
 
 .comercial-container {
-  background-color: #0d0d0d;
-  color: #e0e0e0;
+  background-color: var(--edna-black);
+  color: var(--edna-white);
   min-height: 100vh;
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -255,7 +262,7 @@ onMounted(() => {
   font-weight: 300;
   font-size: 2rem;
   letter-spacing: 2px;
-  border-bottom: 1px solid #333;
+  border-bottom: 2px solid var(--edna-gray);
   padding-bottom: 10px;
 }
 
@@ -275,33 +282,32 @@ onMounted(() => {
 
 /* --- PAINÉIS --- */
 .panel {
-  background-color: #1a1a1a;
-  border: 1px solid #333;
+  background-color: var(--edna-dark-gray);
+  border: 0px solid var(--edna-gray);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 1vw rgba(0,0,0,0.5);
 }
 
 .panel h2 {
   margin-top: 0;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--edna-gray);
   padding-bottom: 10px;
   margin-bottom: 20px;
-  color: #ff9800;
+  color: var(--edna-yellow);
 }
 
 /* --- FORMULÁRIOS --- */
 input, select {
-  background-color: #2c2c2c;
-  border: 1px solid #444;
-  color: white;
+  background-color: var(--edna-gray);
+  color: var(--edna-white);
   padding: 8px 12px;
   border-radius: 6px;
   outline: none;
 }
 
 input:focus, select:focus {
-  border-color: #ff9800;
+  border: 2px solid var(--edna-orange);
 }
 
 /* Estilo do form inline (Produtos) */
@@ -322,7 +328,6 @@ input:focus, select:focus {
   flex-direction: column;
   gap: 1vw;
   margin-bottom: 3vh;
-  background: #252525;
   padding: 15px;
   border-radius: 8px;
 }
@@ -332,17 +337,17 @@ input:focus, select:focus {
 }
 .form-stack .dates label {
   font-size: 0.85rem;
-  color: #aaa;
+  color: var(--edna-light-gray);
   display: flex;
   flex-direction: column;
 }
 
 /* --- BOTÕES --- */
 button {
+  color: var(--edna-black);
   cursor: pointer;
   border: none;
   border-radius: 6px;
-  font-weight: bold;
   transition: filter 0.2s;
 }
 button:hover {
@@ -350,8 +355,7 @@ button:hover {
 }
 
 .btn-add {
-  background-color: #ff9800;
-  color: black;
+  background-color: var(--edna-yellow);
   font-size: 1.5rem;
   width: 40px;
   display: flex;
@@ -359,40 +363,92 @@ button:hover {
   justify-content: center;
 }
 
+.btn-add span {
+  color: var(--edna-black);
+}
+
 .btn-save {
-  background-color: #4caf50;
-  color: white;
+  background-color: var(--edna-green);
   padding: 0 20px;
 }
 
-.btn-delete {
-  background: none;
-  font-size: 1.2rem;
+
+/* --- CARDS --- */
+.card-item {
+  background-color: var(--edna-gray);
+  border-radius: 8px;
+  border: 2px solid rgba(0, 0, 0, 0);
+  padding: 15px;
+  transition: transform 0.1s, background-color 0.2s;
 }
 
-.btn-close {
-  background: transparent;
-  color: #ff5555;
-  font-size: 1.5rem;
+.card-item:hover {
+  border: 2px solid var(--edna-light-gray);
 }
 
-/* --- TABELA (PRODUTOS) --- */
-.dark-table {
-  width: 100%;
-  border-collapse: collapse;
+/* --- CARDS (PRODUTOS) --- */
+.card-produto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.dark-table th, .dark-table td {
-  text-align: left;
-  padding: 10px;
-  border-bottom: 1px solid #333;
+
+.card-main {
+  flex: 1;
 }
-.dark-table th {
-  color: #888;
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.card-top h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--edna-white);
+}
+
+.marca-tag {
+  font-size: 0.75rem;
+  color: var(--edna-light-gray);
+  text-transform: uppercase;
+  background: #111;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.card-details {
+  display: flex;
+  gap: 15px;
   font-size: 0.9rem;
 }
+
+.price {
+  color: var(--edna-green);
+}
+
+.stock {
+  color: var(--edna-light-gray);
+}
 .low-stock {
-  color: #ff5555;
-  font-weight: bold;
+  color: var(--edna-orange);
+}
+
+.btn-icon-delete {
+  background: none;
+  color: var(--edna-red);
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.7;
+  padding: 5px;
+  transition: opacity 0.2s;
+}
+.btn-icon-delete:hover {
+  transform: scale(1.2);
+  opacity: 1;
 }
 
 /* --- CARDS (OFERTAS) --- */
@@ -405,8 +461,8 @@ button:hover {
 }
 
 .card-oferta {
-  background-color: #222;
-  border: 1px solid #333;
+  background-color: var(--edna-gray);
+  border: 1px solid var(--edna-gray);
   border-radius: 8px;
   padding: 15px;
   position: relative;
@@ -421,12 +477,12 @@ button:hover {
 .card-header h3 {
   margin: 0 0 10px 0;
   font-size: 1.1rem;
-  color: #fff;
+  color: var(--edna-white);
 }
 
 .dates {
   font-size: 0.85rem;
-  color: #888;
+  color: var(--edna-light-gray);
   margin-bottom: 10px;
 }
 
@@ -439,26 +495,31 @@ button:hover {
 }
 
 .tag-price .discount {
-  background-color: #673ab7;
-  color: white;
+  background-color: var(--edna-orange);
+  color: var(--edna-gray);
 }
 
 .tag-price .fixed {
-  background-color: #009688;
-  color: white;
+  background-color: var(--edna-green);
+  color: var(--edna-gray);
 }
 
 .itens-placeholder {
   margin-top: 15px;
   padding-top: 10px;
-  border-top: 1px dashed #444;
+  border-top: 1px dashed var(--edna-gray);
 }
 .itens-placeholder ul {
   list-style: none;
   padding: 0;
 }
 .disabled-text {
-  color: #555;
+  color: var(--edna-light-gray);
   font-style: italic;
 }
+
+/* SCROLL BAR */
+.list-cards::-webkit-scrollbar { width: 6px; }
+.list-cards::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+.list-cards::-webkit-scrollbar-track { background: #161616; }
 </style>
