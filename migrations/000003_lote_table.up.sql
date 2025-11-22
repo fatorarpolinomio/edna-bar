@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS Lote (
     estragados int CHECK (estragados >= 0) DEFAULT 0,
     quantidade_inicial int CHECK (quantidade_inicial > 0),
 
-    FOREIGN KEY (id_fornecedor) REFERENCES Fornecedor(id_fornecedor),
-    FOREIGN KEY (id_produto) REFERENCES Produto(id_produto)
+    FOREIGN KEY (id_fornecedor) REFERENCES Fornecedor(id_fornecedor) ON DELETE CASCADE,
+    FOREIGN KEY (id_produto) REFERENCES Produto(id_produto) ON DELETE CASCADE
 );
