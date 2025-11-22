@@ -426,10 +426,6 @@ select {
     outline: none;
 }
 
-input:focus,
-select:focus {
-    border: 2px solid var(--edna-orange);
-}
 
 /* Estilo do form inline (Produtos) */
 .form-inline {
@@ -477,7 +473,7 @@ button:hover {
 }
 
 .btn-add {
-    background-color: var(--edna-yellow);
+    background-color: var(--edna-green);
     font-size: 1.5rem;
     width: 40px;
     display: flex;

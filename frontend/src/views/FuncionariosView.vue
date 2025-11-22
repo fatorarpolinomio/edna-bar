@@ -198,189 +198,280 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Estilo baseado no Tema E.D.N.A e no desenho */
-
-.page-container {
-  background-color: var(--edna-black);
-  min-height: 100vh;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+:root {
+    --edna-blue: #b6e5f3;
+    --edna-green: #5ad3b0;
+    --edna-wine: #a12d4c;
+    --edna-red: #e71d51;
+    --edna-orange: #f4716e;
+    --edna-yellow: #ffd782;
+    --edna-light-gray: #888899;
+    --edna-gray: #353545;
+    --edna-dark-gray: #2a2a32;
+    --edna-black: #1a1a1e;
+    --edna-white: #f4f4ff;
 }
 
+/* --- LAYOUT DA PÁGINA --- */
+.nav-space {
+    background-image: linear-gradient(
+        220deg,
+        var(--edna-green),
+        var(--edna-blue)
+    );
+}
+
+.page-container {
+    background-color: var(--edna-black);
+    min-height: 100vh;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--edna-white);
+}
+
+/* --- PAINÉIS (CARDS GRANDES) --- */
 .card-panel {
-  background-color: var(--edna-dark-gray);
-  border: 1px solid var(--edna-gray);
-  border-radius: 15px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    background-color: var(--edna-dark-gray);
+    border: 1px solid var(--edna-gray);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.mt-large {
+    margin-top: 20px;
+}
+
+.panel-header {
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--edna-gray);
+    padding-bottom: 10px;
 }
 
 .panel-header h2 {
+  margin-top: 0;
   color: var(--edna-yellow);
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
-  border-bottom: 2px solid var(--edna-wine);
-  display: inline-block;
-  padding-bottom: 5px;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .subtitle {
-  color: var(--edna-light-gray);
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
+    color: var(--edna-light-gray);
+    margin-top: 5px;
 }
 
-/* --- Formulários --- */
+/* --- FORMULÁRIOS --- */
 .form-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  align-items: center;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    background-color: var(--edna-dark-gray); /* Fundo mais escuro para destaque */
+    padding: 20px 0px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    align-items: center;
 }
 
 input, select {
-  background-color: var(--edna-black);
-  color: var(--edna-white);
-  border: 1px solid var(--edna-gray);
-  padding: 10px;
-  border-radius: 5px;
-  flex: 1;
-  min-width: 120px;
+    background-color: var(--edna-gray);
+    color: var(--edna-white);
+    border: 1px solid var(--edna-gray);
+    padding: 12px;
+    border-radius: 6px;
+    flex: 1;
+    min-width: 120px;
+    outline: none;
+    font-size: 0.95rem;
+    box-sizing: border-box;
 }
 
-input:focus, select:focus {
-  border-color: var(--edna-green);
-  outline: none;
+input:focus,
+select:focus {
+    border: 2px solid var(--edna-orange);
 }
 
 .input-short {
-  max-width: 100px;
+    max-width: 120px;
 }
 
+/* Botão de Adicionar (+) */
 .btn-action {
-  background-color: var(--edna-green);
-  color: var(--edna-black);
-  font-weight: bold;
-  font-size: 1.5rem;
-  width: 45px;
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
+    background-color: var(--edna-green);
+    color: var(--edna-black);
+    font-weight: bold;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: filter 0.2s;
+    flex-shrink: 0;
 }
 
-/* --- Tabela (Funcionários) --- */
+.btn-action:hover {
+    filter: brightness(1.1);
+}
+
+/* --- TABELA DE FUNCIONÁRIOS --- */
 .table-wrapper {
-  overflow-x: auto;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--edna-gray);
 }
 
 table {
-  width: 100%;
-  border-collapse: collapse;
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--edna-dark-gray);
 }
 
 th {
-  background-color: var(--edna-gray);
-  color: var(--edna-yellow);
-  text-align: left;
-  padding: 12px;
+    background-color: var(--edna-gray);
+    color: var(--edna-light-gray);
+    text-align: left;
+    padding: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
 }
 
 td {
-  border-bottom: 1px solid var(--edna-gray);
-  padding: 12px;
-  color: var(--edna-white);
+    border-bottom: 1px solid var(--edna-gray);
+    padding: 15px;
+    color: var(--edna-white);
 }
 
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background-color: rgba(200, 200, 255, 0.03);
+}
+
+/* Badges e Tags */
 .badge {
-  background-color: var(--edna-wine);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
+    background-color: var(--edna-yellow);
+    color: var(--edna-dark-gray);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    border: 1px solid var(--edna-gray);
 }
 
 .money {
-  color: var(--edna-green);
-  font-family: monospace;
+    color: var(--edna-green);
+    font-family: monospace;
+    font-size: 1rem;
 }
 
+/* Botões de Ação da Tabela */
 .btn-delete {
-  background-color: var(--edna-red);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+    background-color: transparent;
+    border: 1px solid var(--edna-red);
+    color: var(--edna-red);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    font-weight: bold;
 }
 
-/* --- Cards (Itens) --- */
+.btn-delete:hover {
+    background-color: var(--edna-red);
+    color: var(--edna-dark-gray);
+}
+
+/* --- GRID DE ITENS (Cards) --- */
 .grid-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
 }
 
 .item-card {
-  background-color: var(--edna-gray);
-  border-radius: 8px;
-  padding: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-  border: 1px solid transparent;
+    background-color: var(--edna-gray);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    transition: transform 0.2s;
+    border-left: 4px solid var(--edna-green); /* Identidade visual de item */
 }
 
 .item-card:hover {
-  border-color: var(--edna-blue);
+    border-color: var(--edna-white);
+    transform: translateY(-3px);
 }
 
 .item-info h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: var(--edna-white);
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--edna-white);
+    margin-bottom: 5px;
 }
 
 .item-info p {
-  margin: 5px 0 0 0;
-  font-size: 0.85rem;
-  color: var(--edna-light-gray);
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--edna-light-gray);
+    text-transform: uppercase;
 }
 
 .item-qtd {
-  text-align: center;
-  background-color: var(--edna-black);
-  padding: 8px;
-  border-radius: 6px;
-  min-width: 60px;
+    text-align: center;
+    background-color: var(--edna-dark-gray);
+    padding: 8px 12px;
+    border-radius: 6px;
+    min-width: 60px;
 }
 
 .qtd-label {
-  display: block;
-  font-size: 0.7rem;
-  color: var(--edna-light-gray);
+    display: block;
+    font-size: 0.7rem;
+    color: var(--edna-light-gray);
+    text-transform: uppercase;
 }
 
 .qtd-value {
-  font-size: 1.2rem;
-  color: var(--edna-orange);
-  font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--edna-white);
+    font-weight: bold;
 }
 
 .btn-close {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: none;
-  color: var(--edna-red);
-  font-size: 1.2rem;
-  cursor: pointer;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--edna-gray);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s;
 }
+
+.btn-close:hover {
+    color: var(--edna-red);
+}
+
+/* Scrollbar da página */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--edna-black); }
+::-webkit-scrollbar-thumb { background: var(--edna-gray); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--edna-light-gray); }
 </style>

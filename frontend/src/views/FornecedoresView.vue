@@ -49,7 +49,7 @@ const carregarDados = async () => {
     const [resFornecedores, resLotes, resProdutos] = await Promise.all([
       api.getFornecedores(),
       api.getLotes(),
-      api.getProdutosEstruturais()
+      api.getProdutos()
     ]);
 
     fornecedores.value = resFornecedores.data || [];
@@ -160,7 +160,7 @@ onMounted(() => {
               <div class="form-row">
                 <label class="date-label">Entrada: <input v-model="formLote.data_fornecimento" type="date"></label>
                 <label class="date-label">Validade: <input v-model="formLote.validade" type="date"></label>
-                <button @click="criarLote" class="btn-add btn-full">Registrar Lote</button>
+                <button @click="criarLote" class="btn-add btn-full">Registrar</button>
               </div>
             </div>
           </header>
@@ -358,12 +358,12 @@ onMounted(() => {
   color: var(--edna-black);
   padding: 0 15px;
 }
-.btn-full { width: 100%; margin-top: auto; height: 38px; } /* Alinha com os inputs */
+.btn-full { width: 40%; margin-top: auto; height: 2rem; } /* Alinha com os inputs */
 
 .btn-icon-add {
-  background-color: var(--edna-yellow);
+  background-color: var(--edna-green);
   color: var(--edna-black);
-  width: 40px;
+  width: 2rem;
   aspect-ratio: 1;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; 
@@ -391,12 +391,12 @@ onMounted(() => {
 }
 
 .card:hover {
-  border-left-color: var(--edna-yellow);
+  border-left-color: var(--edna-white);
 }
 
 /* Card Lote */
 .lote-card {
-  border-left-color: var(--edna-blue);
+  border-left-color: var(--edna-orange);
 }
 
 .card-header {
@@ -461,7 +461,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-left-color: var(--edna-orange);
+  border-left-color: var(--edna-red);
 }
 .f-info h3 {
   margin: 0;
