@@ -14,11 +14,14 @@ func NewLoteFilter(params url.Values) (util.Filter, error) {
 		return filter, err
 	}
 
-	attrs := []string{"id_fornecedor", "id_produto", "preco_unitario", "estragados", "quantidade_inicial", "validade"}
+	attrs := []string{"id_lote", "id_fornecedor", "id_produto", "preco_unitario", "estragados", "quantidade_inicial", "validade"}
 	if err := filter.GetSorts(params, attrs); err != nil {
 		return filter, err
 	}
 
+	if err := filter.GetFilterInt(params, "id_lote"); err != nil {
+		return filter, err
+	}
 	if err := filter.GetFilterInt(params, "id_fornecedor"); err != nil {
 		return filter, err
 	}

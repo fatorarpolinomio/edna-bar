@@ -21,7 +21,7 @@ type FuncionarioCreate struct {
 
 func (fc FuncionarioCreate) ToFuncionario() Funcionario {
 	return Funcionario{
-		Nome:            fc.CPF,
+		Nome:            fc.Nome,
 		CPF:             fc.CPF,
 		Tipo:            fc.Tipo,
 		Expediente:      fc.Expediente,
