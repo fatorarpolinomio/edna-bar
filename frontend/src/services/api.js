@@ -28,9 +28,6 @@ export default {
   getProdutosComerciais(filters = null) {
     return apiClient.get("/produtos/comercial", filters);
   },
-  getClientes(filters = null) {
-    return apiClient.get("/clientes");
-  },
   getOfertas(filters = null) {
     return apiClient.get("/ofertas");
   },
@@ -85,6 +82,7 @@ export default {
   deleteByEndpoint(endpoint) {
     return apiClient.delete(endpoint);
   },
+
   getLotes(filters = null) {
     return apiClient.get("/lotes", { params: filters });
   },
@@ -105,13 +103,24 @@ export default {
   },
   createCliente(data) {
     return apiClient.post("/clientes", data);
-      return apiClient.delete(`/lotes/${id}`);
   },
+  // --- NOVOS MÉTODOS PARA EDIÇÃO E REMOÇÃO DE CLIENTES ---
+  updateCliente(id, data) {
+    return apiClient.put(`/clientes/${id}`, data);
+  },
+  deleteCliente(id) {
+    return apiClient.delete(`/clientes/${id}`);
+  },
+
   getFinancialReport(params) {
-    return apiClient.get('/relatorios/financeiro', { params });
+    return apiClient.get("/relatorios/financeiro", { params });
   },
   getPayrollReport(params) {
-    return apiClient.get('/relatorios/folha-pagamento', { params });
+    return apiClient.get("/relatorios/folha-pagamento", { params });
+  },
+  updateVenda(id, data) {
+    // data deve conter todos os campos: id_cliente, id_funcionario, datas, etc.
+    return apiClient.put(`/vendas/${id}`, data);
   },
   updateProdutoComercial(id, data) {
     return apiClient.put(`/produtos/comercial/${id}`, data);

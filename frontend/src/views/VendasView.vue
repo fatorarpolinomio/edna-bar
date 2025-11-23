@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, reactive, watch } from "vue";
 import api from "@/services/api";
+import ModalPagamento from "@/views/ModalPagamento.vue";
 
 // --- ESTADO GERAL ---
 const modo = ref("nova"); // 'nova', 'historico', 'clientes'
@@ -20,6 +21,10 @@ const formVenda = reactive({
     tipo_pagamento: "pix",
 });
 
+// --- DADOS: PAGAMENTO FIADO ---
+const showPagamentoModal = ref(false);
+const vendaParaPagar = ref(null);
+
 // --- DADOS: HISTÓRICO ---
 const historicoVendas = ref([]);
 const vendaSelecionada = ref(null);
@@ -29,6 +34,9 @@ const itensVendaSelecionada = ref([]);
 const clienteSelecionado = ref(null);
 const historicoCliente = ref([]);
 const saldoCliente = ref(0);
+
+const isEditing = ref(false); // Controla se estamos em modo de edição
+const editingId = ref(null); // Guarda o ID do cliente em edição
 
 // --- DADOS: NOVO CLIENTE ---
 const isCreatingClient = ref(false);
@@ -111,13 +119,20 @@ const finalizarVenda = async () => {
     if (carrinho.value.length === 0) return alert("Carrinho vazio.");
 
     try {
-        // 1. Criar Cabeçalho da Venda
+        const isFiado = formVenda.tipo_pagamento === "fiado";
+
         const resVenda = await api.createVenda({
             id_cliente: parseInt(formVenda.id_cliente),
             id_funcionario: parseInt(formVenda.id_funcionario),
+
+            // LÓGICA CORRIGIDA:
+            // 1. A data define se é dívida (null = não pagou ainda)
+            data_hora_pagamento: isFiado ? null : new Date().toISOString(),
+
+            // 2. O tipo deve ser enviado como string 'fiado' para o banco aceitar
             tipo_pagamento: formVenda.tipo_pagamento,
+
             data_hora_renda: new Date().toISOString(),
-            data_hora_pagamento: new Date().toISOString(),
         });
 
         const idVenda = resVenda.data.id;
@@ -213,31 +228,130 @@ const iniciarCadastroCliente = () => {
     Object.assign(formCliente, { nome: "", cpf: "", data_nascimento: "" });
 };
 
+// Função para preencher o formulário com dados existentes
+const iniciarEdicaoCliente = (cliente) => {
+    clienteSelecionado.value = null;
+    isCreatingClient.value = true; // Reutiliza o painel de criação
+    isEditing.value = true;
+    editingId.value = cliente.id;
+
+    formCliente.nome = cliente.nome;
+    formCliente.cpf = cliente.cpf || "";
+    // Formatar data para input date (YYYY-MM-DD)
+    formCliente.data_nascimento = cliente.data_nascimento
+        ? cliente.data_nascimento.split("T")[0]
+        : "";
+};
+
+// Função Salvar atualizada para suportar Edição
 const salvarCliente = async () => {
     if (!formCliente.nome || !formCliente.cpf)
         return alert("Nome e CPF obrigatórios");
 
     try {
         const payload = { ...formCliente };
+
         if (payload.data_nascimento) {
-            payload.data_nascimento = new Date(
-                payload.data_nascimento,
-            ).toISOString();
+            // Adiciona manualmente o horário para satisfazer o formato RFC3339 do Go
+            // Isso transforma "2001-02-20" em "2001-02-20T00:00:00Z"
+            payload.data_nascimento = `${payload.data_nascimento}T00:00:00Z`;
         } else {
             payload.data_nascimento = null;
         }
+        // ... (formatação de data igual ao original)
 
-        await api.createCliente(payload);
+        if (isEditing.value) {
+            // LÓGICA DE ATUALIZAÇÃO
+            await api.updateCliente(editingId.value, payload);
+            alert("Cliente atualizado!");
+        } else {
+            // LÓGICA DE CRIAÇÃO
+            await api.createCliente(payload);
+            alert("Cliente cadastrado!");
+        }
 
-        alert("Cliente cadastrado!");
+        // Resetar estado
         isCreatingClient.value = false;
-        carregarDadosIniciais(); // Recarrega a lista
+        isEditing.value = false;
+        carregarDadosIniciais();
     } catch (error) {
         alert(
-            "Erro ao criar: " + (error.response?.data?.detail || error.message),
+            "Erro ao salvar: " +
+                (error.response?.data?.detail || error.message),
         );
     }
 };
+
+// Nova função de Deletar
+const deletarCliente = async (id) => {
+    if (!confirm("Tem certeza? Isso apagará o histórico deste cliente."))
+        return;
+
+    try {
+        await api.deleteCliente(id);
+        // Limpa seleção se o cliente deletado era o ativo
+        if (clienteSelecionado.value?.id === id) {
+            clienteSelecionado.value = null;
+        }
+        await carregarDadosIniciais();
+    } catch (error) {
+        alert(
+            "Erro ao deletar: " +
+                (error.response?.data?.detail || error.message),
+        );
+    }
+};
+
+// --- LÓGICA PARA ABRIR O MODAL ---
+const abrirPagamentoFiado = (venda) => {
+    // Só abre se for fiado
+    if (venda.tipo_pagamento === "fiado") {
+        vendaParaPagar.value = venda;
+        showPagamentoModal.value = true;
+    }
+};
+
+// --- AÇÃO PARA SALVAR O PAGAMENTO ---
+const processarPagamentoDivida = async (dadosPagamento) => {
+    try {
+        // Prepara o objeto completo que o backend espera no PUT
+        // O backend Go substitui todos os campos, então precisamos enviar tudo de volta
+        const payload = {
+            id_cliente: dadosPagamento.id_cliente,
+            id_funcionario: dadosPagamento.id_funcionario,
+            data_hora_renda: dadosPagamento.data_hora_renda,
+
+            // Campos atualizados:
+            tipo_pagamento: dadosPagamento.tipo_pagamento,
+            data_hora_pagamento: new Date().toISOString(), // Marca como pago agora
+        };
+
+        await api.updateVenda(dadosPagamento.id, payload);
+
+        alert("Dívida quitada com sucesso!");
+        showPagamentoModal.value = false;
+        vendaParaPagar.value = null;
+
+        // Recarrega os dados do cliente atual para atualizar saldo e extrato
+        if (clienteSelecionado.value) {
+            await selecionarCliente(clienteSelecionado.value);
+        }
+    } catch (error) {
+        console.error(error);
+        alert(
+            "Erro ao processar pagamento: " +
+                (error.response?.data?.detail || error.message),
+        );
+    }
+};
+
+// Alteração no Watch para limpar estado ao trocar de aba
+watch(modo, (novoVal) => {
+    // ...
+    isEditing.value = false;
+    editingId.value = null;
+    // ...
+});
 
 const selecionarCliente = async (cliente) => {
     isCreatingClient.value = false;
@@ -317,6 +431,12 @@ const formatarData = (isoStr) =>
             Clientes
         </button>
     </div>
+    <ModalPagamento
+        v-if="showPagamentoModal"
+        :venda="vendaParaPagar"
+        @close="showPagamentoModal = false"
+        @confirm="processarPagamentoDivida"
+    />
 
     <div class="vendas-layout">
         <div class="panel-left">
@@ -336,7 +456,9 @@ const formatarData = (isoStr) =>
                     <span v-else-if="modo === 'clientes'">
                         {{
                             isCreatingClient
-                                ? "Novo Cadastro"
+                                ? isEditing
+                                    ? "Editar Cliente"
+                                    : "Novo Cadastro"
                                 : "Extrato Cliente"
                         }}
                     </span>
@@ -378,6 +500,9 @@ const formatarData = (isoStr) =>
                                     <option value="credito">Crédito</option>
                                     <option value="debito">Débito</option>
                                     <option value="dinheiro">Dinheiro</option>
+                                    <option value="fiado">
+                                        Fiado (Pagar Depois)
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -533,14 +658,32 @@ const formatarData = (isoStr) =>
                                 :key="v.id"
                                 class="item-row"
                             >
-                                <span class="col-date">{{
-                                    formatarData(v.data_hora_renda).split(
-                                        " ",
-                                    )[0]
-                                }}</span>
-                                <span class="col-name">{{
-                                    v.tipo_pagamento
-                                }}</span>
+                                <span class="col-date">
+                                    {{
+                                        formatarData(v.data_hora_renda).split(
+                                            " ",
+                                        )[0]
+                                    }}
+                                </span>
+
+                                <span
+                                    class="col-name"
+                                    :class="{
+                                        'fiado-tag':
+                                            v.tipo_pagamento === 'fiado',
+                                    }"
+                                    @click="abrirPagamentoFiado(v)"
+                                    title="Clique para pagar"
+                                >
+                                    {{ v.tipo_pagamento }}
+                                    <span
+                                        v-if="v.tipo_pagamento === 'fiado'"
+                                        style="font-size: 0.7rem"
+                                    >
+                                        (Pagar)</span
+                                    >
+                                </span>
+
                                 <span class="col-price"
                                     >R$ {{ v.total.toFixed(2) }}</span
                                 >
@@ -587,7 +730,7 @@ const formatarData = (isoStr) =>
                     class="btn-fab"
                     @click="salvarCliente"
                 >
-                    ✓
+                    {{ isEditing ? "✎" : "✓" }}
                 </button>
             </div>
         </div>
@@ -635,33 +778,39 @@ const formatarData = (isoStr) =>
                 <div
                     class="card-sale new-client-card"
                     @click="iniciarCadastroCliente"
-                    :class="{ active: isCreatingClient }"
+                    :class="{ active: isCreatingClient && !isEditing }"
                 >
-                    <div
-                        class="sale-left"
-                        style="
-                            flex-direction: row;
-                            align-items: center;
-                            gap: 10px;
-                        "
-                    >
-                        <span class="sale-id" style="font-size: 1.5rem">+</span>
-                        <span class="sale-client">Cadastrar Novo Cliente</span>
-                    </div>
+                    <span class="sale-client">Cadastrar Novo Cliente</span>
                 </div>
 
                 <div
                     v-for="c in clientes"
                     :key="c.id"
                     class="card-sale card-cliente"
-                    :class="{ active: clienteSelecionado?.id === c.id }"
                     @click="selecionarCliente(c)"
                 >
                     <div class="sale-left">
                         <span class="sale-client">{{ c.nome }}</span>
                         <span class="client-cpf">{{ c.cpf }}</span>
                     </div>
+
                     <div class="sale-right">
+                        <div class="action-buttons">
+                            <button
+                                class="btn-icon btn-edit"
+                                @click.stop="iniciarEdicaoCliente(c)"
+                                title="Editar"
+                            >
+                                ✎
+                            </button>
+                            <button
+                                class="btn-icon btn-del"
+                                @click.stop="deletarCliente(c.id)"
+                                title="Excluir"
+                            >
+                                ×
+                            </button>
+                        </div>
                         <span class="sale-tag">ID: {{ c.id }}</span>
                     </div>
                 </div>
@@ -1106,6 +1255,20 @@ select:focus {
     font-size: 0.8rem;
     text-transform: uppercase;
     font-weight: bold;
+}
+.fiado-tag {
+    color: var(--edna-orange);
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.fiado-tag:hover {
+    color: var(--edna-yellow);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 0 4px;
 }
 
 ::-webkit-scrollbar {
