@@ -114,5 +114,11 @@ export default {
   },
   deleteLote(id) {
       return apiClient.delete(`/lotes/${id}`);
-  }
+  },
+  getFinancialReport(params) {
+    return apiClient.get('/relatorios/financeiro', { params });
+  },
+  getPayrollReport(params) {
+    return apiClient.get('/relatorios/folha-pagamento', { params });
+  },
 };
