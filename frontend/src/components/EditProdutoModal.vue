@@ -132,16 +132,20 @@ const salvar = () => {
   gap: 15px;
 }
 
+.form-row {
+  display: flex;
+  gap: 15px;
+  /* Garante que a linha não exceda o tamanho do pai */
+  width: 100%; 
+}
+
 .form-group {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 5px;
-}
-
-.form-group label {
-  font-size: 0.85rem;
-  color: var(--edna-light-gray);
+  /* IMPORTANTE: Permite que o flex item encolha se necessário, evitando estouro */
+  min-width: 0; 
 }
 
 input {
@@ -151,6 +155,8 @@ input {
   padding: 10px;
   border-radius: 6px;
   outline: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 input:focus {
