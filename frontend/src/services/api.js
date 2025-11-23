@@ -119,4 +119,7 @@ export default {
   updateFuncionario(id, data) {
     return apiClient.put(`/funcionarios/${id}`, data);
   },
+  updateProduto(id, data) {
+    return apiClient.put(`/produtos/${id}`, data);
+  },
 };
