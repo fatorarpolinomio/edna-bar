@@ -2,6 +2,7 @@
 import { ref, onMounted, reactive } from "vue";
 import api from "@/services/api";
 import EditProdutoModal from "@/components/EditProdutoModal.vue";
+import EditOfertaModal from "@/components/EditOfertaModal.vue";
 
 // --- ESTADO ---
 const produtos = ref([]);
@@ -29,18 +30,25 @@ const ofertaForm = reactive({
     valor: "", // Será mapeado para valor_fixo ou percentual_desconto
 });
 
+// --- ESTADO EDIÇÃO DE OFERTA (NOVO) ---
+const showEditOfertaModal = ref(false);
+const ofertaParaEditar = ref({});
+
 // --- AÇÕES ---
 const carregarDados = async () => {
     carregando.value = true;
     try {
-        // Buscando no backend os produtos e ofertas
+        // 1. Buscar Produtos e Ofertas em paralelo
         const [resProdutos, resOfertas] = await Promise.all([
             api.getProdutosComerciais(),
             api.getOfertas(),
         ]);
 
-        // Enquanto não temos a quantidade
         const produtosTemp = resProdutos.data || [];
+
+        // NOVO: Criar Mapa de Produtos para acesso rápido (ID -> Produto)
+        const mapaProdutos = {};
+        produtosTemp.forEach((p) => (mapaProdutos[p.id] = p));
 
         // Busca quantidades em paralelo
         const produtosComQuantidade = await Promise.all(
@@ -57,8 +65,37 @@ const carregarDados = async () => {
             }),
         );
 
-        produtos.value = produtosComQuantidade;
-        ofertas.value = resOfertas.data || [];
+        produtos.value = produtosComQuantidade; // (Resultado da lógica existente)
+        const ofertasTemp = resOfertas.data || [];
+
+        // NOVO: Buscar itens para cada oferta e adicionar o nome do produto
+        const ofertasComItens = await Promise.all(
+            ofertasTemp.map(async (oferta) => {
+                try {
+                    const resItens = await api.getItensPorOferta(
+                        oferta.id_oferta,
+                    );
+                    const itensRaw = resItens.data || [];
+
+                    const itensDetalhados = itensRaw.map((item) => {
+                        const produtoInfo = mapaProdutos[item.id_produto];
+                        return {
+                            ...item,
+                            nomeProduto: produtoInfo
+                                ? produtoInfo.nome
+                                : `Produto #${item.id_produto}`,
+                        };
+                    });
+
+                    return { ...oferta, itens: itensDetalhados };
+                } catch (err) {
+                    console.error(`Erro itens oferta ${oferta.id_oferta}`, err);
+                    return { ...oferta, itens: [] };
+                }
+            }),
+        );
+
+        ofertas.value = ofertasComItens; // Atualiza o estado com os itens inclusos
     } catch (error) {
         console.error("Erro ao carregar dados:", error);
         alert("Erro ao conectar com o servidor.");
@@ -152,6 +189,54 @@ const deletarItem = async (tipo, id) => {
     }
 };
 
+// --- AÇÕES DE EDIÇÃO DE OFERTA (NOVO) ---
+
+const abrirEdicaoOferta = (oferta) => {
+    ofertaParaEditar.value = { ...oferta };
+    showEditOfertaModal.value = true;
+};
+
+const salvarEdicaoOferta = async (dados) => {
+    try {
+        await api.updateOferta(dados.id, dados);
+        alert("Promoção atualizada!");
+        await carregarDados();
+    } catch (error) {
+        alert(
+            "Erro ao atualizar: " +
+                (error.response?.data?.detail || error.message),
+        );
+    }
+};
+
+const adicionarItemOferta = async (payload) => {
+    try {
+        await api.addItemOferta(payload);
+        await carregarDados();
+        // Atualiza o modal aberto com os dados novos
+        const atualizada = ofertas.value.find(
+            (o) => o.id_oferta === payload.id_oferta,
+        );
+        if (atualizada) ofertaParaEditar.value = { ...atualizada };
+    } catch (error) {
+        alert("Erro ao adicionar item.");
+    }
+};
+
+const removerItemOferta = async (payload) => {
+    try {
+        await api.removeItemOferta(payload.id_produto, payload.id_oferta);
+        await carregarDados();
+        // Atualiza o modal aberto
+        const atualizada = ofertas.value.find(
+            (o) => o.id_oferta === payload.id_oferta,
+        );
+        if (atualizada) ofertaParaEditar.value = { ...atualizada };
+    } catch (error) {
+        alert("Erro ao remover item.");
+    }
+};
+
 // Abre o modal com os dados do produto clicado
 const abrirEdicao = (prod) => {
     produtoParaEditar.value = { ...prod }; // Copia para não alterar a lista diretamente
@@ -188,6 +273,16 @@ onMounted(() => {
             :produto="produtoParaEditar"
             @close="showEditModal = false"
             @save="salvarEdicao"
+        />
+
+        <EditOfertaModal
+            :visible="showEditOfertaModal"
+            :oferta="ofertaParaEditar"
+            :produtosDisponiveis="produtos"
+            @close="showEditOfertaModal = false"
+            @save-info="salvarEdicaoOferta"
+            @add-item="adicionarItemOferta"
+            @remove-item="removerItemOferta"
         />
 
         <div class="content-grid">
@@ -332,12 +427,25 @@ onMounted(() => {
                     >
                         <div class="card-header">
                             <h3>{{ oferta.nome }}</h3>
-                            <button
-                                @click="deletarItem('oferta', oferta.id_oferta)"
-                                class="btn-icon-delete"
-                            >
-                                ×
-                            </button>
+
+                            <div class="actions-top">
+                                <button
+                                    @click="abrirEdicaoOferta(oferta)"
+                                    class="btn-icon-edit"
+                                    title="Editar Oferta"
+                                >
+                                    ✎
+                                </button>
+                                <button
+                                    @click="
+                                        deletarItem('oferta', oferta.id_oferta)
+                                    "
+                                    class="btn-icon-delete"
+                                    title="Excluir Oferta"
+                                >
+                                    ×
+                                </button>
+                            </div>
                         </div>
 
                         <div class="card-body">
@@ -366,13 +474,29 @@ onMounted(() => {
                                     >R$ {{ oferta.valor_fixo }}</span
                                 >
                             </div>
-
                             <div class="itens-placeholder">
                                 <small>Itens da oferta:</small>
-                                <ul>
+                                <ul
+                                    v-if="
+                                        oferta.itens && oferta.itens.length > 0
+                                    "
+                                >
+                                    <li
+                                        v-for="(item, idx) in oferta.itens"
+                                        :key="idx"
+                                        class="item-line"
+                                    >
+                                        <span class="qtd"
+                                            >{{ item.quantidade }}x</span
+                                        >
+                                        <span class="nome">{{
+                                            item.nomeProduto
+                                        }}</span>
+                                    </li>
+                                </ul>
+                                <ul v-else>
                                     <li class="disabled-text">
-                                        Lista de itens indisponível (API
-                                        pendente)
+                                        Nenhum item vinculado.
                                     </li>
                                 </ul>
                             </div>
@@ -702,6 +826,26 @@ button:hover {
     font-style: italic;
 }
 
+/* Novos estilos para a lista de itens da oferta */
+.item-line {
+    display: flex;
+    gap: 8px;
+    color: var(--edna-white);
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+
+.item-line .qtd {
+    color: var(--edna-yellow);
+    font-weight: bold;
+    min-width: 20px;
+    text-align: right;
+}
+
+.item-line .nome {
+    color: var(--edna-light-gray);
+}
+
 /* SCROLL BAR */
 .list-cards::-webkit-scrollbar {
     width: 6px;
@@ -712,5 +856,27 @@ button:hover {
 }
 .list-cards::-webkit-scrollbar-track {
     background: #161616;
+}
+
+/* ADICIONAR NO FINAL */
+
+.actions-top {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Caso btn-icon-edit não esteja definido globalmente, adicione: */
+.btn-icon-edit {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: transform 0.2s;
+}
+.btn-icon-edit:hover {
+    opacity: 1;
+    transform: scale(1.2);
 }
 </style>

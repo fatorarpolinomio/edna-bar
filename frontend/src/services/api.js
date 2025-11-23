@@ -134,4 +134,20 @@ export default {
   updateLote(id, data) {
     return apiClient.put(`/lotes/${id}`, data);
   },
+  getItensPorOferta(idOferta) {
+    return apiClient.get(`/item_ofertas/oferta/${idOferta}`);
+  },
+  // Métodos para OFERTA
+  updateOferta(id, data) {
+    return apiClient.put(`/ofertas/${id}`, data);
+  },
+
+  // Métodos para ITENS DA OFERTA
+  addItemOferta(data) {
+    // data deve ser { id_oferta, id_produto, quantidade }
+    return apiClient.post("/item_ofertas", data);
+  },
+  removeItemOferta(idProduto, idOferta) {
+    return apiClient.delete(`/item_ofertas/${idProduto}/${idOferta}`);
+  },
 };
