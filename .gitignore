@@ -38,6 +38,6 @@ main
 
 # Node module
 node_modules/
-dist/
+**/dist/
 
 nginx/certs/
