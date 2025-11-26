@@ -46,7 +46,10 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: nginx:stable
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: runner
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/conf.d/certs:/etc/ssl/cloudflare:ro
