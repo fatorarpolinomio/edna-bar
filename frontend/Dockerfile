@@ -42,7 +42,7 @@ COPY . .
 RUN npm run build --if-present
 
 ################################
-# Runner stage
+# Runner stage (Can be used for development OR for running the frontend alone)
 ################################
 FROM nginx:stable-alpine AS runner
 

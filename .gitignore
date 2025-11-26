@@ -25,6 +25,10 @@ tmp/
 # .env file
 .env
 
+# Secrets
+*_rsa
+*_rsa.pub
+
 # Project build
 main
 *templ.go
@@ -35,3 +39,5 @@ main
 # Node module
 node_modules/
 dist/
+
+nginx/certs/
