@@ -76,7 +76,7 @@ A ferramenta de migrações utilizada é o [go-migrate](https://github.com/golan
 
 Segue um Diagrama Entidade Relacionamento da Aplicação em Banco de Dados.
 
-![Diagrama Entidade-Relacionamento do Sistema EDNA bar](assets/E.D.N.A_conceitual_1.png)
+![Diagrama Entidade-Relacionamento do Sistema EDNA bar](assets/E.D.N.A_conceitual_1.jpeg)
 
 ## Licensa
 
