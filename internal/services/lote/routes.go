@@ -241,7 +241,7 @@ func (h *Handler) getRelatorio(w http.ResponseWriter, r *http.Request) {
 // @Tags Lote
 // @Produce json
 // @Param id path string true "ID Produto"
-// @Success 200 {object} []Lote
+// @Success 200 {array} model.Lote
 // @Failure 400 {object} types.ErrorResponse
 // @Failure 422 {object} types.ErrorResponse
 // @Router /lotes/produtos/{id} [get]

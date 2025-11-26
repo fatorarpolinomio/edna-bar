@@ -2,7 +2,8 @@
 
 set -e
 
-# DB_URL
+# Exporte a variável de ambiente ou set manualmente.
+# DB_URL="postgres://user:pass@localhost:5432/dbname?sslmode=disable"
 if [ -z "${DB_URL:-}" ]; then
     echo "Error: DB_URL environment variable not set."
     echo "Please set DB_URL to your database connection string, e.g.:"

@@ -146,6 +146,24 @@ definitions:
       tipo:
         type: string
     type: object
+  model.ItemOferta:
+    properties:
+      id_oferta:
+        type: integer
+      id_produto:
+        type: integer
+      quantidade:
+        type: integer
+    type: object
+  model.ItemOfertaCreate:
+    properties:
+      id_oferta:
+        type: integer
+      id_produto:
+        type: integer
+      quantidade:
+        type: integer
+    type: object
   model.Lote:
     properties:
       data_fornecimento:
@@ -943,6 +961,227 @@ paths:
       summary: Check health of the system
       tags:
       - Server
+  /item_ofertas:
+    get:
+      parameters:
+      - description: 'Filter by nome using operators: like, ilike, eq, ne. Format:
+          operator.value (e.g. like.João)'
+        in: query
+        name: filter-nome
+        type: string
+      - description: 'Filter by cnpj using operators: eq, ne, like, ilike. Format:
+          operator.value (e.g. eq.123456789)'
+        in: query
+        name: filter-cnpj
+        type: string
+      - description: 'Sort fields: nome, cnpj. Prefix with ''-'' for desc. Comma separated
+          for multiple fields (e.g. -nome,cnpj)'
+        in: query
+        name: sort
+        type: string
+      - description: Pagination offset (default 0)
+        in: query
+        name: offset
+        type: integer
+      - description: Pagination limit (default 10)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ItemOferta'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List Item Ofertas
+      tags:
+      - Item Oferta
+  /item_ofertas/{id_produto}/{id_oferta}:
+    delete:
+      parameters:
+      - description: Produto ID
+        in: path
+        name: id_produto
+        required: true
+        type: integer
+      - description: Oferta ID
+        in: path
+        name: id_oferta
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ItemOferta'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete ItemOferta
+      tags:
+      - Item Oferta
+    get:
+      parameters:
+      - description: Produto ID
+        in: path
+        name: id_produto
+        required: true
+        type: integer
+      - description: Oferta ID
+        in: path
+        name: id_oferta
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ItemOferta'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get ItemOferta by composed ID
+      tags:
+      - ItemOferta
+  /item_ofertas/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ItemOferta ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ItemOferta payload
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/model.ItemOfertaCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ItemOferta'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update ItemOferta
+      tags:
+      - ItemOferta
+  /item_ofertas/item/{id}:
+    get:
+      parameters:
+      - description: Item (Produto) ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ItemOferta'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get ItemOferta by Item ID
+      tags:
+      - Item Oferta
+  /item_ofertas/oferta/{id}:
+    get:
+      parameters:
+      - description: Oferta ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ItemOferta'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get ItemOferta by Oferta ID
+      tags:
+      - Item Oferta
+  /itemOfertas:
+    post:
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.ItemOferta'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get ItemOferta by Item ID
+      tags:
+      - Item Oferta
   /lotes:
     get:
       parameters:
@@ -1099,6 +1338,34 @@ paths:
           schema:
             $ref: '#/definitions/types.ErrorResponse'
       summary: Update Lote
+      tags:
+      - Lote
+  /lotes/produtos/{id}:
+    get:
+      parameters:
+      - description: ID Produto
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Lote'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get All Lotes by ID Produto
       tags:
       - Lote
   /lotes/relatorio:

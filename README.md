@@ -1,6 +1,5 @@
 <img width="100%" height="360px" alt="home_banner" src="https://github.com/user-attachments/assets/eeddc485-bf9a-4fc1-9600-8b438dd0bb98" />
 
-
 # E.D.N.A - Ecossistema D. Negociação Alcoólica
 
 Sistema de banco de dados de Bar. Gerencie produtos, atendimentos e outras atividades do seu bar com nosso sistema.
@@ -26,42 +25,71 @@ Sistema de banco de dados de Bar. Gerencie produtos, atendimentos e outras ativi
 
 A API _backend_ foi criada utilizando a linguagem **Go** (1.24). O servidor HTTP foi desenvolvido usando inteiramente a biblioteca padrão `net/http`. Enquanto o banco de dados utilizado é um banco **PostgreSQL**. Já no _frontend_, foi utilizado o framework **Vue.js** e **CSS** puro. Por último, a aplicação foi conteinerizada através de **Docker** e exposta por _reverse proxy_ **Nginx**.
 
-## Como rodar
+## Pré-requisitos
+- Docker & Docker Compose
+- PostgreSQL _Opcionalmente_ (caso prefira não usar o Docker)
+- Node.js +22
+- Go +1.24
+- Go-migrate para as migrações.
 
-### Utilizando o Docker (Produção)
-
-Antes de mais nada tenha o Docker instalado com Docker Compose. 
-Configure as variáveis de ambiente em um arquivo `.env` seguindo os exemplos em `.env.example`.
-
-Inicie os containers com o comando `docker compose up -d`. Popule a base de dados rodando as migrações com o script: `./migrate.sh up`.
-
-> Atualize o script `migrate.sh` com a `DB_URL` e os valores corretos definidos em `.env`.
- 
-Feito isso, acesse o frontend através do endereço `http://localhost:80` e o backend em `http://localhost:80/api`.
-
-> Atenção, esse modo foi pensando para ser rodado em produção. Confira a próxima seção para saber como desenvolver esse projeto.
-
-### Em desenvolvimento
-
-#### Backend
-Configure as variáveis de ambiente em um arquivo `.env` seguindo os exemplos em `.env.example`.
-
-Primeiro, instale a versão `1.24` da linguagem Go, a versão mais recente do Docker e Docker-compose. Em adendo para realizar as migrações é preciso instalar o `go-migrate`, você pode fazer isso com:
+O último requisito pode ser instalado com:
 ```sh
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.18.3
 ```
 
-Inicie a base de dados com `make docker-run` (use `sudo` se necessário). Vá para a migração mais recente (se já não estiver) com `./migrate.sh up`, isso irá criar as tabelas no seu banco de dados (e populá-lo com dados), se quiser saber mais sobre o conceito de migrações veja a próxima seção.
+## Como rodar
 
-Por último rode projeto com `make run`. Para rodar com _hot reloading_ (alterações serão refletidas instantâneamente) use `make watch`.
+Para rodar em modo de desenvolvimento.
 
-#### Frontend
+Antes de mais nada é preciso ter o Docker instalado com o Docker Compose. Ou você pode configurar a base de dados Postgres manualmente.
+Crie um arquivo `.env` com variáveis configuradas semelhantes ao arquivo `.env.example`. Também crie um arquivo `.env` dentro da pasta frontend com a variável `VITE_BACKEND_BASE_URL=http://localhost:8080/v1` para o frontend acessar o back em modo de desenvolvimento.
+Os arquivos `.env.example` contém uma explicação de cada variável, **não exponha-as em produção**.
 
-Entre na pasta `frontend` com `cd frontend`. Instale as dependências necessárias com `npm install` e rode no modo de desenvolvimento com `npm run dev`.
+Feito isso, inicie o container da base de dados utilizando o comando `docker compose up -d database` ou com o _Make_, com `make docker-run` (derrube o container com `make docker-down`). 
 
-Leia mais informações em [frontend/README.md](frontend/README.md)
+> O arquivo `Makefile` contém vários comandos simples para rodar o projeto, veja mais em `make help`.
 
-### Migrações
+Na primeira vez (ou em modificações ao banco), popule ou atualize a base de dados com o script `migrate.sh`.
+```sh
+./migrate.sh up
+```
+Não esqueça de configurar a variável `DB_URL` dentro arquivo com o caminho para sua base de dados.
+
+Para rodar o **backend** use o compile o projeto em go ou use o comando `make run`. Para rodar em modo de _hotreloading_ use:
+```sh
+make watch
+```
+
+Já para o **frontend**, entre na pasta `frontend` e execute os seguintes comandos:
+
+1. Para baixar as dependências:
+```sh
+npm install
+```
+2. Para rodar o projeto:
+```sh
+npm run dev
+```
+
+## Fazendo o Deploy
+
+A aplicação foi inteiramente conteinerizada para rodar em produção. Configure as variáveis de ambiente corretamente e **não exponha segredos**. Crie um conjunto de certificados, ou através da um provedor e os armazene na pasta `nginx/conf.d/certs`. Se necessário mude os nomes dos certificados em `nginx/conf.d/site.conf` (ou mantenha os nomes atuais: `origin.pem` e `origin.key`).
+
+Para o deploy, rode o comando:
+
+```sh
+docker compose up -d --build
+```
+
+Para as migrações, um comando único do docker foi adicionado:
+```sh
+docker compose --profile migrate run --rm migrate
+```
+Isso deve executar as migrações na base de dados.
+
+> Atualize o script `migrate.sh` com `DB_URL` antes de rodar esse comando.
+
+## Sobre migrações
 
 > Migrações são scripts SQL que são rodados na base de dados e permitem criar um histórico de alterações e navegar por elas.
 
@@ -70,7 +98,6 @@ Não esqueça de acionar a base de dados antes de rodar migrações e de atualiz
 As migrações vivem em `migrations`. Utilize o script `migrate.sh` para gerenciar migrações. Crie novas migrações com `./migrate.sh create <migration_name>`. Vá para a migração mais recente com `./migrate.sh up`, volte **uma** migração com `./migrate.sh down 1`. Veja mais comandos em `./migrate.sh help`. 
 
 A ferramenta de migrações utilizada é o [go-migrate](https://github.com/golang-migrate/migrate).
-
 
 ## Diagrama Conceitual
 

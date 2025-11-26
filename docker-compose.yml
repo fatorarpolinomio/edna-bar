@@ -11,6 +11,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     networks:
       - internal
+    ports:
+      - "${DB_DEV_PORT:-}" # Only exposes in devmode
     volumes:
       - psql_volume_bp:/var/lib/postgresql/data
 

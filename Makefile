@@ -58,16 +58,16 @@ run:
 	@go run cmd/api/main.go
 # Create DB container
 docker-run:
-	@if docker compose up --build -d 2>/dev/null; then \
+	@if docker compose up --build -d database 2>/dev/null; then \
 		echo "Running Docker Compose" ; \
 	else \
 		echo "Falling back to Docker Compose V1"; \
-		docker-compose up --build; \
+		docker-compose up --build database; \
 	fi
 
 # Shutdown DB container
 docker-down:
-	@if docker compose down 2>/dev/null; then \
+	@if docker compose down database 2>/dev/null; then \
 		echo "Shutdown Docker Compose" ; \
 	else \
 		echo "Falling back to Docker Compose V1"; \
