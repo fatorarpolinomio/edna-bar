@@ -53,7 +53,6 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/conf.d/certs:/etc/ssl/cloudflare:ro
-      - ./frontend/dist:/usr/share/nginx/html:ro
     ports:
       - "80:80"
       - "443:443"
@@ -64,6 +63,20 @@ services:
     depends_on:
       - frontend
       - backend
+
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - ./migrations:/migrations
+      - ./migrate.sh:/migrate.s
+    entrypoint: ["sh", "-c", "/migrate.sh up"]
+    depends_on:
+      - database
+    networks:
+      - internal
+    profiles:
+      - migrate
+    restart: "no"
 
 volumes:
   psql_volume_bp:

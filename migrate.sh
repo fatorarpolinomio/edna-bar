@@ -1,9 +1,15 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
-# Database connection URL
-DB_URL=${DB_URL:-"postgres://admin:password1234@localhost:5432/edna-db?sslmode=disable"}
+# DB_URL
+if [ -z "${DB_URL:-}" ]; then
+    echo "Error: DB_URL environment variable not set."
+    echo "Please set DB_URL to your database connection string, e.g.:"
+    echo "  export DB_URL=\"postgres://user:pass@localhost:5432/dbname?sslmode=disable\""
+    exit 1
+fi
+
 # Migrations directory path
 MIGRATIONS_DIR=${MIGRATIONS_DIR:-"./migrations"}
 
