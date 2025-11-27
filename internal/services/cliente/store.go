@@ -52,7 +52,7 @@ func (s *Store) GetAllWithSaldo(ctx context.Context, filter util.Filter) ([]mode
 	) SELECT id_cliente, nome, cpf, data_nascimento,
 		COALESCE(saldo_devedor, 0)::numeric(12, 2)
 		FROM Cliente
-		LEFT JOIN ClienteDevedor USING(id_cliente);
+		LEFT JOIN ClienteDevedor USING(id_cliente)
 	`
 	// Constroi a query de filtros manualmente
 	var values []any
